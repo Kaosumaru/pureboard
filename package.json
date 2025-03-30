@@ -15,7 +15,7 @@
     "test:watch": "jest --watch",
     "test": "jest --coverage",
     "typecheck": "tsc --noEmit",
-    "postbuild": "cp package.json lib"
+    "postbuild": "cp package.json lib && cp README.md lib && cp LICENSE lib"
   },
   "repository": {
     "type": "git",
