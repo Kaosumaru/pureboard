@@ -2,9 +2,9 @@
   "name": "pureboard",
   "version": "0.0.0-development",
   "description": "A library for creating multiplayer boardgames",
-  "main": "./lib/index.js",
+  "main": "./index.js",
   "files": [
-    "lib/**/*"
+    "**/*"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
@@ -14,7 +14,8 @@
     "semantic-release": "semantic-release",
     "test:watch": "jest --watch",
     "test": "jest --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postbuild": "cp package.json dist"
   },
   "repository": {
     "type": "git",
@@ -75,6 +76,7 @@
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"
   },
   "release": {
+    "pkgRoot": "dist",
     "branches": [
       "main"
     ],
