@@ -15,6 +15,7 @@ module.exports = {
     'plugin:prettier/recommended',
   ],
   rules: {
+    'max-len': 'off',
     'prettier/prettier': 'warn',
     'node/no-missing-import': 'off',
     'node/no-empty-function': 'off',
@@ -28,5 +29,13 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ]
   },
 };
