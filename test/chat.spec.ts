@@ -8,11 +8,12 @@ describe('chat client', () => {
     const server = new TestServer();
     const client = server.createClient();
 
-    registerChat(server);
+    registerChat(server, true);
     const chatCreator = createChat();
 
     const gameId = 0;
     const chatServer = chatCreator(gameId);
+
     const chatClient = new ChatClient({ client, gameId });
 
     await chatClient.sendMessage('test message');

@@ -6,7 +6,7 @@ import { ClientRandomGenerator } from './clientRandom';
 import { BaseClient } from './baseClient';
 import { getClientHiddenObjects } from './clientHiddenObjects';
 import { Signal } from 'typed-signals';
-import { GameRoomState } from '../shared/gameRoomStore';
+import { IClient } from './interface';
 
 export interface IDisposableClient {
   initialize(): void;
@@ -18,24 +18,27 @@ export interface IBaseComponentClient {
   restartGame(options: GameOptions): Promise<void>;
 }
 
+export interface IComponentClient {
+  client: IClient;
+  gameId?: number;
+}
+
 export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseClient implements IDisposableClient, IBaseComponentClient {
   public store: Store<Data>;
   public container: StoreContainer<Data, Action, HiddenType>;
   public hiddenObjectsStore: Store<HiddenObjectsState<HiddenType>>;
-  protected gameRoomClient: GameRoomClient;
   protected gameId: number;
 
-  constructor(container: StoreContainer<Data, Action, HiddenType>, type: string, gameRoomClient: GameRoomClient) {
-    super(gameRoomClient.client);
+  constructor(container: StoreContainer<Data, Action, HiddenType>, type: string, client: IComponentClient) {
+    if (client.gameId === undefined) throw new Error('GameId is not set');
+    super(client.client);
 
-    if (!gameRoomClient.gameId) throw new Error('GameId is not set');
-    this.gameId = gameRoomClient.gameId;
+    this.gameId = client.gameId;
 
     this.container = container;
     this.store = container.store;
     this.type = type;
     this.hiddenObjectsStore = createHiddenObjectsStore<HiddenType>();
-    this.gameRoomClient = gameRoomClient;
   }
 
   public initialize(): void {
@@ -79,18 +82,6 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     this.hasState = false;
   }
 
-  public seatOf(): number {
-    return this.gameRoomClient.seatOf();
-  }
-
-  haveSeat(index: number): boolean {
-    return this.gameRoomClient.haveSeat(index);
-  }
-
-  public getGameRoomClient(): GameRoomClient {
-    return this.gameRoomClient;
-  }
-
   protected doAction(action: Action | StandardGameAction): Promise<void> {
     return this.client.call<void>(`${this.type}/action`, this.gameId, action);
   }
@@ -107,9 +98,6 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     return this.hiddenObjectsStore.getState();
   }
 
-  protected gameRoomState(): GameRoomState {
-    return this.gameRoomClient.store.getState();
-  }
 
   public async getState(): Promise<Data> {
     const resp = await this.client.call<StateResponseInterface<Data, HiddenType>>(`${this.type}/getGameState`, this.gameId);

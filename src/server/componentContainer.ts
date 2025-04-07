@@ -82,14 +82,14 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     this.applyAction(ctx, gameId, action, validation);
   }
 
-  registerServer(server: IServer): void {
+  registerServer(server: IServer, noValidation = false): void {
     server.RegisterFunction(this.type + '/action', (ctx, gameId: number, action: ActionType | StandardGameAction) => {
-      const validation = createCurrentPlayerValidation(ctx, gameId);
+      const validation = noValidation ? createDummyValidation() : createCurrentPlayerValidation(ctx, gameId);
       this.applyAction(ctx, gameId, action, validation);
     });
 
     server.RegisterFunction(this.type + '/getGameState', (ctx, gameId: number) => {
-      const validation = createCurrentPlayerValidation(ctx, gameId);
+      const validation = noValidation ? createDummyValidation() : createCurrentPlayerValidation(ctx, gameId);
       const game = this.get(gameId);
       return {
         state: game?.container.store.getState(),

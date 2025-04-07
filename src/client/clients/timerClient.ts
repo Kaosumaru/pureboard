@@ -1,9 +1,8 @@
 import { Action, StoreData, createGameStateStore } from '../../shared/stores/timerStore';
-import { GameRoomClient } from '../gameRoomClient';
-import { BaseComponentClient } from '../baseComponentClient';
+import { BaseComponentClient, IComponentClient } from '../baseComponentClient';
 
 export class TimerClient extends BaseComponentClient<StoreData, Action> {
-  constructor(gameRoomClient: GameRoomClient) {
+  constructor(gameRoomClient: IComponentClient) {
     super(createGameStateStore(0, 0, 0), 'timer', gameRoomClient);
   }
 }

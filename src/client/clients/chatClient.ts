@@ -1,20 +1,20 @@
 import { Action, StoreData, createGameStateStore } from '../../shared/stores/chatStore';
-import { GameRoomClient } from '../gameRoomClient';
-import { BaseComponentClient } from '../baseComponentClient';
+import { BaseComponentClient, IComponentClient } from '../baseComponentClient';
 import { Signal } from 'typed-signals';
 
 export class ChatClient extends BaseComponentClient<StoreData, Action> {
-  constructor(gameRoomClient: GameRoomClient) {
+  constructor(gameRoomClient: IComponentClient) {
     super(createGameStateStore(), 'chat', gameRoomClient);
   }
 
   public sendMessage(message: string): Promise<void> {
+    const info = this.client.getUserInfo();
     return this.doAction({
       type: 'message',
       message: {
         user: {
-          id: this.gameRoomClient.userInfo?.id ?? '',
-          name: this.gameRoomClient.userInfo?.name ?? '',
+          id: info?.id ?? '',
+          name: info?.name ?? '',
         },
         message,
       },
@@ -24,8 +24,9 @@ export class ChatClient extends BaseComponentClient<StoreData, Action> {
   protected override onAction(action: Action): void {
     super.onAction(action);
     if (action.type === 'message') {
+      const info = this.client.getUserInfo();
       this.onMessage.emit(action.message.user.name, action.message.message);
-      if (action.message.user.id !== this.gameRoomClient.userInfo?.id) {
+      if (action.message.user.id !== info?.id) {
         this.onExternalMessage.emit(action.message.user.name, action.message.message);
         return;
       }

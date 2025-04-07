@@ -21,6 +21,6 @@ export function createChatWithCallback(callback?: ChatMessageCallback): GameCons
   });
 }
 
-export function registerChat(server: IServer): void {
-  gameContainer.registerServer(server);
+export function registerChat(server: IServer, noValidation = false): void {
+  gameContainer.registerServer(server, noValidation);
 }
