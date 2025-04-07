@@ -1,6 +1,5 @@
 import { RPCServer } from 'yawr';
-import { IServer } from './interface';
 
-export function createServer(port?: number): IServer {
+export function createServer(port?: number): RPCServer {
   return new RPCServer(port);
 }
