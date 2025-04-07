@@ -2,6 +2,8 @@ import { Context, UserInfo } from 'yawr';
 import { IServer } from '../src/server/interface';
 import { IClient } from '../src/client/interface';
 import { SignalConnection, Signal } from 'typed-signals';
+import { IncomingMessage } from 'http';
+import { Duplex } from 'stream';
 
 export class TestServer implements IServer {
   private groups: Map<string, TestClient[]> = new Map();
@@ -68,6 +70,10 @@ export class TestServer implements IServer {
       this.groups.set(group, clients);
     }
     clients.push(client);
+  }
+
+  handleUpgrade(_request: IncomingMessage, _socket: Duplex, _upgradeHead: Buffer, _callback: (client: WebSocket, request: IncomingMessage) => void): void {
+    throw new Error('Method not implemented.');
   }
 
   protected removeFromGroup(client: TestClient, group: string): void {
