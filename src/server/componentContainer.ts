@@ -14,7 +14,7 @@ import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
 import { createCurrentPlayerValidation, createGameRoomAndJoin, GameConstructor } from './games';
 import { IServer } from './interface';
-import { overridenComponentContainerValidation } from '../test/server';
+import { overridenComponentContainerValidation } from './test/server';
 
 interface IGenericComponent<Data, Action, HiddenType> {
   afterActionApplied(ctx: GroupEmitter, action: Action | StandardGameAction): void;

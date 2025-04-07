@@ -1,6 +1,6 @@
 import { TestServer } from './testServer';
 import { CurrentPlayerValidation } from '../src/shared/interface';
-import { overrideComponentContainerValidation } from '../src/test/server';
+import { overrideComponentContainerValidation } from '../src/server/test/server';
 import { IComponentClient, IDisposableClient } from '../src/client/baseComponentClient';
 import { Context } from 'yawr';
 import { GameConstructor } from '../src/server/games';

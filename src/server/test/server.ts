@@ -1,5 +1,5 @@
 import { Context } from 'yawr';
-import { CurrentPlayerValidation } from '../shared/interface';
+import { CurrentPlayerValidation } from '../../shared/interface';
 
 type OverrideValidation = (ctx: Context, gameId: number) => CurrentPlayerValidation;
 
