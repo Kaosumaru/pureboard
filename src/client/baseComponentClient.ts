@@ -26,7 +26,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
   protected gameId: number;
 
   constructor(container: StoreContainer<Data, Action, HiddenType>, type: string, gameRoomClient: GameRoomClient) {
-    super(gameRoomClient.getClient());
+    super(gameRoomClient.client);
 
     if (!gameRoomClient.gameId) throw new Error('GameId is not set');
     this.gameId = gameRoomClient.gameId;

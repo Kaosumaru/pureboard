@@ -9,10 +9,11 @@ import {
   Store,
   StoreContainer,
 } from '../shared/interface';
-import { GroupEmitter, RPCServer } from 'yawr';
+import { GroupEmitter } from 'yawr';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
 import { createCurrentPlayerValidation, createGameRoomAndJoin, GameConstructor } from './games';
+import { IServer } from './interface';
 
 interface IGenericComponent<Data, Action, HiddenType> {
   afterActionApplied(ctx: GroupEmitter, action: Action | StandardGameAction): void;
@@ -81,7 +82,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     this.applyAction(ctx, gameId, action, validation);
   }
 
-  registerServer(server: RPCServer): void {
+  registerServer(server: IServer): void {
     server.RegisterFunction(this.type + '/action', (ctx, gameId: number, action: ActionType | StandardGameAction) => {
       const validation = createCurrentPlayerValidation(ctx, gameId);
       this.applyAction(ctx, gameId, action, validation);
@@ -97,7 +98,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     });
   }
 
-  registerServerWithCreation(server: RPCServer, constructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
+  registerServerWithCreation(server: IServer, constructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
     this.registerServer(server);
     server.RegisterFunction(this.type + '/createGame', (ctx, options: GameOptions) => {
       let components: GameConstructor[] = [this.addGame(constructor(), options, settings.afterAction)];

@@ -35,10 +35,6 @@ export class GameRoomClient extends BaseClient {
     });
   }
 
-  public getClient(): RPCClient {
-    return this.client;
-  }
-
   public seatOf(): number {
     return seatOf(this.userInfo?.id ?? '', this.state());
   }

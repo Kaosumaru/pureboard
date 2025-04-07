@@ -1,7 +1,8 @@
 import { canUserMoveAsPlayer, GameRoomData, UserInfo } from '../shared/gameRoomStore';
-import { Context, RPCServer } from 'yawr';
+import { Context } from 'yawr';
 import { CurrentPlayerValidation, GameOptions } from '../shared/interface';
 import { generate as generateRandomString } from 'randomstring';
+import { IServer } from './interface';
 
 interface GameRoom {
   data: GameRoomData;
@@ -39,7 +40,7 @@ function userInfoFromContext(ctx: Context): UserInfo {
 }
 
 function getGameRoom(ctx: Context, gameId: number): GameRoomData {
-  if (!ctx.userId) throw new Error('Not authorized');
+  if (ctx.userId === undefined) throw new Error('Not authorized');
   const game = games.get(gameId);
   if (!game) throw new Error('Game not found');
   if (!game.joinedPlayers.has(ctx.userId)) throw new Error('Not joined to this game');
@@ -47,7 +48,7 @@ function getGameRoom(ctx: Context, gameId: number): GameRoomData {
 }
 
 function joinGame(ctx: Context, gameId: number, password?: string): GameRoomData {
-  if (!ctx.userId) throw new Error('Not authorized');
+  if (ctx.userId === undefined) throw new Error('Not authorized');
   const game = games.get(gameId);
   if (!game) throw new Error('Game not found');
   if (game.data.password && game.data.password !== password) throw new Error('Invalid password');
@@ -88,7 +89,7 @@ export function createGameRoomAndJoin(ctx: Context, options: GameOptions, type: 
   return data;
 }
 
-export function registerGames(server: RPCServer): void {
+export function registerGames(server: IServer): void {
   const deleteGame = (gameId: number) => {
     const game = games.get(gameId);
     if (!game) return;

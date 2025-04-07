@@ -1,10 +1,10 @@
 import { SignalConnection } from 'typed-signals';
-import { RPCClient } from 'yawr';
+import { IClient } from './interface';
 
 export class BaseClient {
-  protected client: RPCClient;
+  public readonly client: IClient;
 
-  constructor(client: RPCClient) {
+  constructor(client: IClient) {
     this.client = client;
   }
 

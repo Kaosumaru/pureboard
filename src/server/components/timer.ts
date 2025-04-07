@@ -1,8 +1,9 @@
 import { StoreData, Action, createGameStateStore, timeLeftForPlayer } from '../../shared/stores/timerStore';
-import { GroupEmitter, RPCServer } from 'yawr';
+import { GroupEmitter } from 'yawr';
 import { ComponentContainer } from '../componentContainer';
 import { StandardGameAction, Store } from '../../shared/interface';
 import { GameConstructor } from '../games';
+import { IServer } from '../interface';
 
 type ActionType = Action;
 
@@ -34,6 +35,6 @@ export function createTimer(cb: TimerCallback, maxTime: number, players: number,
   return gameContainer.addGame(store, { players }, afterActionApplied);
 }
 
-export function registerTimer(server: RPCServer): void {
+export function registerTimer(server: IServer): void {
   gameContainer.registerServer(server);
 }

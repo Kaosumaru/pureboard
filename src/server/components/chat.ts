@@ -1,7 +1,7 @@
 import { StoreData, Action, UserInfo, createGameStateStore } from '../../shared/stores/chatStore';
-import { RPCServer } from 'yawr';
 import { ComponentContainer } from '../componentContainer';
 import { GameConstructor } from '../games';
+import { IServer } from '../interface';
 
 type ActionType = Action;
 
@@ -21,6 +21,6 @@ export function createChatWithCallback(callback?: ChatMessageCallback): GameCons
   });
 }
 
-export function registerChat(server: RPCServer): void {
+export function registerChat(server: IServer): void {
   gameContainer.registerServer(server);
 }
