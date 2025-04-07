@@ -7,7 +7,7 @@
     "**/*"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsup",
     "clean": "rm -rf ./lib/",
     "cm": "cz",
     "lint": "eslint ./src/ --fix",
@@ -15,7 +15,7 @@
     "test:watch": "jest --watch",
     "test": "jest --coverage",
     "typecheck": "tsc --noEmit",
-    "postbuild": "cp package.json lib && cp README.md lib && cp LICENSE lib"
+    "postbuild2": "cp package.json lib && cp README.md lib && cp LICENSE lib"
   },
   "repository": {
     "type": "git",
@@ -65,6 +65,7 @@
     "semantic-release": "^21.0.1",
     "ts-jest": "^29.3.0",
     "ts-node": "^10.2.1",
+    "tsup": "^8.4.0",
     "typescript": "^5.7.3"
   },
   "config": {
