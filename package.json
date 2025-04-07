@@ -7,7 +7,7 @@
     "**/*"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup ",
     "clean": "rm -rf ./lib/",
     "cm": "cz",
     "lint": "eslint ./src/ --fix",
@@ -15,7 +15,7 @@
     "test:watch": "jest --watch",
     "test": "jest --coverage",
     "typecheck": "tsc --noEmit",
-    "postbuild2": "cp package.json lib && cp README.md lib && cp LICENSE lib"
+    "postbuild": "cp package.json lib && cp README.md lib && cp LICENSE lib"
   },
   "repository": {
     "type": "git",
