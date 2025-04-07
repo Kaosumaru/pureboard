@@ -1,6 +1,6 @@
 import { StoreData, Action, UserInfo, createGameStateStore } from '../../shared/stores/chatStore';
 import { ComponentContainer } from '../componentContainer';
-import { GameConstructor } from '../games';
+import { createCurrentPlayerValidation, GameConstructor } from '../games';
 import { IServer } from '../interface';
 
 type ActionType = Action;
@@ -21,6 +21,6 @@ export function createChatWithCallback(callback?: ChatMessageCallback): GameCons
   });
 }
 
-export function registerChat(server: IServer, noValidation = false): void {
-  gameContainer.registerServer(server, noValidation);
+export function registerChat(server: IServer, validationFunction = createCurrentPlayerValidation): void {
+  gameContainer.registerServer(server, validationFunction);
 }

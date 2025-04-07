@@ -1,16 +1,29 @@
+import { Context } from 'yawr';
 import { ChatClient } from '../src/client/clients/chatClient';
 import { createChat, createChatWithCallback, registerChat } from '../src/server/components/chat';
 import { GameConstructor } from '../src/server/games';
 import { Action, Message } from '../src/shared/stores/chatStore';
 import { TestServer } from './helper';
+import { CurrentPlayerValidation } from '../src/shared/interface';
 
 type SendAction<Action> = (action: Action) => Promise<void>;
+
+function createValidation(ctx: Context, _gameId: number): CurrentPlayerValidation {
+  const userId = ctx.userId ?? '';
+  const userName = ctx.userName ?? '';
+
+  return {
+    isUser: (id: string, name: string) => id === userId && name === userName,
+    canMoveAsPlayer: (_player: number) => true,
+    isServerOriginating: () => false,
+  };
+}
 
 async function testChat<Action>(chatCreator: GameConstructor, cb: (chatClient: ChatClient, sendAction: SendAction<Action>) => Promise<void>) {
   const server = new TestServer();
   const client = server.createClient();
 
-  registerChat(server, true);
+  registerChat(server, createValidation);
 
   const gameId = 0;
   server.addToGroup(client, `game/${gameId}`);
@@ -74,18 +87,20 @@ describe('chat client', () => {
   });
 
   // this shouldn't pass, but passes since we are disabling validation on the server
-  xit('client should be allowed to send a message as a different user', async () => {
+  it('client should be allowed to send a message as a different user', async () => {
     await testChat<Action>(createChat(), async (_chatClient, sendAction) => {
-      await sendAction({
-        type: 'message',
-        message: {
-          user: {
-            id: 'otherUser',
-            name: 'otherUser',
+      await expect(
+        sendAction({
+          type: 'message',
+          message: {
+            user: {
+              id: 'otherUser',
+              name: 'otherUser',
+            },
+            message: 'test message',
           },
-          message: 'test message',
-        },
-      });
+        })
+      ).rejects.toThrowError('Not allowed to send message');
     });
   });
 });
