@@ -65,7 +65,6 @@
     "semantic-release": "^21.0.1",
     "ts-jest": "^29.3.0",
     "ts-node": "^10.2.1",
-    "tsup": "^8.4.0",
     "typescript": "^5.7.3"
   },
   "config": {
