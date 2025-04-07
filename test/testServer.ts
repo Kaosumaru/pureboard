@@ -72,7 +72,7 @@ export class TestServer implements IServer {
     clients.push(client);
   }
 
-  handleUpgrade(_request: IncomingMessage, _socket: Duplex, _upgradeHead: Buffer, _callback: (client: WebSocket, request: IncomingMessage) => void): void {
+  handleUpgrade(_request: IncomingMessage, _socket: Duplex, _upgradeHead: Buffer): void {
     throw new Error('Method not implemented.');
   }
 

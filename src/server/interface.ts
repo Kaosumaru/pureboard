@@ -8,5 +8,5 @@ export interface IServer extends GroupEmitter {
   RegisterFunction(name: string, method: (context: Context, ...args: any[]) => any): void;
   onGroupRemoved(group: string, method: (() => void) | undefined): void;
   groupMemberCount(group: string): number;
-  handleUpgrade(request: IncomingMessage, socket: Duplex, upgradeHead: Buffer, callback: (client: WebSocket, request: IncomingMessage) => void): void;
+  handleUpgrade(request: IncomingMessage, socket: Duplex, upgradeHead: Buffer): void;
 }
