@@ -9,7 +9,7 @@ export class ChatClient extends BaseComponentClient<StoreData, Action> {
 
   public sendMessage(message: string): Promise<void> {
     const info = this.client.getUserInfo();
-    return this.doAction({
+    return this.sendAction({
       type: 'message',
       message: {
         user: {

@@ -9,7 +9,7 @@ import { Signal } from 'typed-signals';
 import { IClient } from './interface';
 
 export interface IDisposableClient {
-  initialize(): void;
+  initialize(): Promise<void>;
   deinitialize(): void;
 }
 
@@ -41,7 +41,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     this.hiddenObjectsStore = createHiddenObjectsStore<HiddenType>();
   }
 
-  public initialize(): void {
+  public async initialize(): Promise<void> {
     this.hasState = false;
     this.deinitialized = false;
     const validation = createDummyValidation();
@@ -70,10 +70,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
       void this.getState();
     });
 
-    this.getState().catch(err => {
-      // TODO show this error somewhere
-      console.error(err);
-    });
+    await this.getState();
   }
 
   public deinitialize(): void {
@@ -82,7 +79,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     this.hasState = false;
   }
 
-  protected doAction(action: Action | StandardGameAction): Promise<void> {
+  public sendAction(action: Action | StandardGameAction): Promise<void> {
     return this.client.call<void>(`${this.type}/action`, this.gameId, action);
   }
 
@@ -109,7 +106,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
   }
 
   public async restartGame(options: GameOptions): Promise<void> {
-    await this.doAction({ type: 'newGame', options });
+    await this.sendAction({ type: 'newGame', options });
   }
 
   protected onAction(_action: Action | StandardGameAction): void {
@@ -138,7 +135,7 @@ export function useAfterAction<T extends BaseComponentClient<any, any, any>>(cli
 export function useClient<T extends IDisposableClient>(type: { new (client: GameRoomClient): T }, baseClient: GameRoomClient): T {
   const client = useMemo(() => new type(baseClient), [baseClient]);
   useEffect(() => {
-    client.initialize();
+    void client.initialize();
     return () => {
       client.deinitialize();
     };
