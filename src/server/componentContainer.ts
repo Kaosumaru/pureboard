@@ -9,11 +9,10 @@ import {
   Store,
   StoreContainer,
 } from '../shared/interface';
-import { GroupEmitter } from 'yawr';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
 import { createCurrentPlayerValidation, createGameRoomAndJoin, GameConstructor } from './games';
-import { IServer } from './interface';
+import { GroupEmitter, IServer } from './interface';
 import { overridenComponentContainerValidation } from './test/server';
 
 interface IGenericComponent<Data, Action, HiddenType> {

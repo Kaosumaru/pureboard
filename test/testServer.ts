@@ -1,9 +1,9 @@
-import { Context, GroupEmitter, UserInfo } from 'yawr';
+import { Context, UserInfo } from 'yawr';
 import { IServer } from '../src/server/interface';
 import { IClient } from '../src/client/interface';
 import { SignalConnection, Signal } from 'typed-signals';
 
-export class TestServer implements IServer, GroupEmitter {
+export class TestServer implements IServer {
   private groups: Map<string, TestClient[]> = new Map();
   private functions: Map<string, (context: Context, ...args: any[]) => any> = new Map();
 

@@ -1,9 +1,8 @@
 import { StoreData, Action, createGameStateStore, timeLeftForPlayer } from '../../shared/stores/timerStore';
-import { GroupEmitter } from 'yawr';
 import { ComponentContainer } from '../componentContainer';
 import { StandardGameAction, Store } from '../../shared/interface';
 import { GameConstructor } from '../games';
-import { IServer } from '../interface';
+import { GroupEmitter, IServer } from '../interface';
 
 type ActionType = Action;
 
