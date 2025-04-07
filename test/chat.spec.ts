@@ -12,10 +12,12 @@ describe('chat client', () => {
     const chatCreator = createChat();
 
     const gameId = 0;
+    server.addToGroup(client, `game/${gameId}`);
     const chatServer = chatCreator(gameId);
-
     const chatClient = new ChatClient({ client, gameId });
+    chatClient.initialize();
 
+    await chatClient.getState();
     await chatClient.sendMessage('test message');
 
     const expectedMessage: Message = {

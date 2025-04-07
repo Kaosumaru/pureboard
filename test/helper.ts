@@ -7,7 +7,7 @@ export class TestServer implements IServer, GroupEmitter {
   private groups: Map<string, TestClient[]> = new Map();
   private functions: Map<string, (context: Context, ...args: any[]) => any> = new Map();
 
-  public createClient(info: UserInfo = { id: '0', name: 'default' }): IClient {
+  public createClient(info: UserInfo = { id: '0', name: 'default' }): TestClient {
     const client = new TestClient(this, info);
     client.context = this.createContext(client);
     return client;
@@ -61,7 +61,7 @@ export class TestServer implements IServer, GroupEmitter {
     }
   }
 
-  protected addToGroup(client: TestClient, group: string): void {
+  public addToGroup(client: TestClient, group: string): void {
     let clients = this.groups.get(group);
     if (!clients) {
       clients = [];

@@ -98,7 +98,6 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     return this.hiddenObjectsStore.getState();
   }
 
-
   public async getState(): Promise<Data> {
     const resp = await this.client.call<StateResponseInterface<Data, HiddenType>>(`${this.type}/getGameState`, this.gameId);
     if (resp.hidden !== undefined) {
