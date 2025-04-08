@@ -1,0 +1,11 @@
+import './index.css'
+import '@fontsource/roboto/400.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <div>Hello world</div>
+  </React.StrictMode>
+);

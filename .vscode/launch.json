@@ -28,6 +28,20 @@
           "<node_internals>/**"
       ],
       "type": "node"
-  },
+   },
+   {
+    "name": "Debug Example Server",
+    "request": "launch",
+    "runtimeArgs": [
+        "run-script",
+        "dev"
+    ],
+    "cwd": "${workspaceFolder}/example",
+    "runtimeExecutable": "npm",
+    "skipFiles": [
+        "<node_internals>/**"
+    ],
+    "type": "node"
+   },
   ]
 }

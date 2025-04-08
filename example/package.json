@@ -1,0 +1,37 @@
+{
+    "name": "pureboard-example",
+    "private": true,
+    "scripts": {
+        "dev": "nodemon src/server/index.ts --host"
+    },
+    "dependencies": {
+        "@fontsource/roboto": "^5.1.1",
+        "express": "^5.1.0",
+        "nodemon": "^2.0.20",
+        "pureboard": "file:../src/",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
+        "react-router-dom": "^7.1.1",
+        "vite": "^4.0.4",
+        "vite-express": "^0.20.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.1",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.1.1",
+        "@typescript-eslint/eslint-plugin": "^4.22.0",
+        "@typescript-eslint/parser": "^4.22.0",
+        "@vitejs/plugin-react": "^3.0.1",
+        "conventional-changelog-conventionalcommits": "^5.0.0",
+        "eslint": "^7.25.0",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-prettier": "^3.4.0",
+        "jest": "^29.7.0",
+        "prettier": "^2.2.1",
+        "ts-jest": "^29.3.0",
+        "ts-node": "^10.2.1",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.7.3"
+    }
+}
