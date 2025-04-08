@@ -21,7 +21,7 @@
       "@server/*": ["./src/server/*"],
     },
   },
-  "include": ["src"],
+  "include": ["src", "./.eslintrc.js"],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
   }

@@ -1,0 +1,148 @@
+body {
+    background: black;
+    color: white;
+}
+
+.main-Page-Container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+h1 {
+    padding: 1rem;
+}
+
+.current-player-container {
+    display: flex;
+    align-items: center;
+}
+
+.cf-Container {
+    --box-width: 6vmax;
+    padding: 5px;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width);
+    grid-template-rows: var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width);
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    justify-items: stretch;
+    align-items: stretch;
+    gap: 5px;
+    top: 1vw;
+}
+
+.cf-Container-transparent {
+    --box-width: 6vmax;
+    padding: 5px;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width);
+    grid-template-rows: var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width) var(--box-width);
+    background-size: 400% 400%;
+    justify-items: stretch;
+    align-items: stretch;
+    gap: 5px;
+    top: 1vw;
+}
+
+.cf-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+}
+
+.cf-item-transparent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cf-item-transparent-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.0);
+}
+
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.cf-token-O {
+    background-color: #e73c7e;
+    border-radius: 50%;
+    width: 4vmax;
+    height: 4vmax;
+}
+
+.cf-token-X {
+    background-color: #23a6d5;
+    border-radius: 50%;
+    width: 4vmax;
+    height: 4vmax;
+}
+
+.cf-token-O-transparent {
+    background-color: #e73c7e94;
+    border-radius: 50%;
+    width: 4vmax;
+    height: 4vmax;
+}
+
+.cf-token-X-transparent {
+    background-color: #23a6d594;
+    border-radius: 50%;
+    width: 4vmax;
+    height: 4vmax;
+}
+
+span > h2, 
+span > .cf-token-X {
+  display: inline-block; /* Or display: inline; if you don't need to control dimensions */
+  vertical-align: middle; /* Optional: To vertically align the elements */
+}
+
+span > h2, 
+span > .cf-token-O {
+  display: inline-block; /* Or display: inline; if you don't need to control dimensions */
+  vertical-align: middle; /* Optional: To vertically align the elements */
+}
+
+.modal-background {
+    position: fixed;
+    top: 80px; /* 50px top margin */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 80px);
+
+    z-index: -1;
+    pointer-events: none; /* Prevent interaction */
+}
+ 
+
+.modal-background-interactable {
+    position: fixed;
+    top: 80px; /* 50px top margin */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 80px);
+
+    z-index: 1;
+}
