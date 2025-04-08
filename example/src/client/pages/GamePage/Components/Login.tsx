@@ -37,7 +37,14 @@ export const Login = (props: LoginProps) => {
         />
 
         <Box sx={{ m: 1, position: 'relative' }}>
-          <Button type="submit" color="primary" variant="contained" disabled={props.isLoading} fullWidth onClick={() => props.onLogin && props.onLogin(username)}>
+          <Button
+            type="submit"
+            color="primary"
+            variant="contained"
+            disabled={props.isLoading}
+            fullWidth
+            onClick={() => props.onLogin && props.onLogin(username)}
+          >
             {props.buttonText ?? 'Login'}
           </Button>
           {props.isLoading && (

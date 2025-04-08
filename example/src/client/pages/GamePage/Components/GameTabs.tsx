@@ -30,7 +30,12 @@ export default function GameTabs(props: GameTabsProps): JSX.Element {
       {(props.padding ?? true) && <Stack padding={1} />}
       {tab === ETabs.Chat && (
         <>
-          <GameChat client={chatClient} ownId={props.gameRoomClient.userInfo?.id ?? ''} readMessages={readMessages} setReadMessages={setReadMessages} />
+          <GameChat
+            client={chatClient}
+            ownId={props.gameRoomClient.userInfo?.id ?? ''}
+            readMessages={readMessages}
+            setReadMessages={setReadMessages}
+          />
         </>
       )}
       {tab !== ETabs.Chat && <SnackBarChat client={chatClient} onClick={() => setTab(ETabs.Chat)} />}
@@ -57,7 +62,13 @@ function TopBar(props: TopBarProps) {
   };
 
   return (
-    <Tabs sx={{ minHeight: '72px', maxHeight: '72px' }} value={props.tab} variant="fullWidth" onChange={handleChange} aria-label="icon label tabs example">
+    <Tabs
+      sx={{ minHeight: '72px', maxHeight: '72px' }}
+      value={props.tab}
+      variant="fullWidth"
+      onChange={handleChange}
+      aria-label="icon label tabs example"
+    >
       <Tab icon={<CasinoIcon />} label="GAME" />
       <Tab
         icon={

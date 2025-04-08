@@ -1,8 +1,8 @@
 import './GamePage.css';
 import { JSX, useEffect, useState } from 'react';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
 import GamePage from './GamePage';
 import { useLoginContext } from '../LoginPage/LoginPage';
+import { GameRoomClient } from 'pureboard/client/gameRoomClient';
 
 function CreateGamePage(): JSX.Element {
   const context = useLoginContext();

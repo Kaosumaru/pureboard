@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension'; // required for devtools typing
-import { CurrentPlayerValidation, RandomGenerator, StandardGameAction, StoreContainer } from 'pureboard/shared/interface';
+import {
+  CurrentPlayerValidation,
+  RandomGenerator,
+  StandardGameAction,
+  StoreContainer,
+} from 'pureboard/shared/interface';
 
 export enum FieldType {
   Empty,
@@ -106,7 +111,12 @@ export function createGameStateStore(): StoreContainer<StoreData, Action | Stand
   };
 }
 
-function makeAction(playerValidation: CurrentPlayerValidation, store: StoreData, action: Action | StandardGameAction, random: RandomGenerator): StoreData | Partial<StoreData> {
+function makeAction(
+  playerValidation: CurrentPlayerValidation,
+  store: StoreData,
+  action: Action | StandardGameAction,
+  random: RandomGenerator
+): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'move':
       return makeMove(playerValidation, store, action.column);

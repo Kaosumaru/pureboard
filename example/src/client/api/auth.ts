@@ -10,6 +10,7 @@ export function useUserIdCookie(): [string, (value: string, options?: any) => vo
   const userIdCookieValue = cookie[key] as string;
   const setUserIdCookie = useCallback(
     (value: string, options?: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setCookie(key, value, options);
     },
     [setCookie]

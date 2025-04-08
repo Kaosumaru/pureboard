@@ -24,12 +24,12 @@ export function createMotionDiv(className: string): ReactNode {
   );
 }
 
-export function createContent(field: FieldType, isLastMove = false): ReactNode {
+export function createContent(field: FieldType): ReactNode {
   switch (field) {
     case FieldType.X:
-      return createMotionDiv('cf-token-X', isLastMove);
+      return createMotionDiv('cf-token-X');
     case FieldType.O:
-      return createMotionDiv('cf-token-O', isLastMove);
+      return createMotionDiv('cf-token-O');
     default:
       return <div></div>;
   }

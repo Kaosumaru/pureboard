@@ -70,13 +70,27 @@ export const ChatThread = (props: ChatThreadProps) => {
     <Main>
       <StyledStack spacing={0.5} alignItems="center" ref={stackRef}>
         {props.entries.map(entry => (
-          <Message key={entry.key} text={entry.message} own={entry.own} nickname={entry.nickname} imageUrl={entry.imageUrl} />
+          <Message
+            key={entry.key}
+            text={entry.message}
+            own={entry.own}
+            nickname={entry.nickname}
+            imageUrl={entry.imageUrl}
+          />
         ))}
       </StyledStack>
       <Stack spacing={0.5}>
         <Flex>
           <FlexGrow>
-            <TextField fullWidth id="chat-input" autoComplete="off" variant="outlined" value={text} onChange={event => setText(event.target.value)} onKeyDown={onKeyDown} />
+            <TextField
+              fullWidth
+              id="chat-input"
+              autoComplete="off"
+              variant="outlined"
+              value={text}
+              onChange={event => setText(event.target.value)}
+              onKeyDown={onKeyDown}
+            />
           </FlexGrow>
           <Button variant="contained" endIcon={<SendIcon />} onClick={sendMessage} />
         </Flex>
