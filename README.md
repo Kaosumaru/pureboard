@@ -10,6 +10,8 @@
 
 > A library for creating multiplayer boardgames
 
+[Overview][overview-url]
+
 ## Install
 
 ```bash
@@ -18,7 +20,9 @@ npm install pureboard
 
 ## Usage
 
-TODO
+pureboard is a library that allows for easy implementation of multiplayer games, by replicating actions on a state. It's designed for boardgame-like games, but can be used for other projects. It uses zustand for state management, so replicated state on client can be easily used in a React project.
+
+[Usage][usage-url]
 
 ## API
 
@@ -48,3 +52,5 @@ See `example` directory for example of a online multiplayer connect4 game.
 [commitizen-img]: https://img.shields.io/badge/commitizen-friendly-brightgreen.svg
 [commitizen-url]: http://commitizen.github.io/cz-cli/
 [documentation-url]: https://kaosumaru.github.io/pureboard/
+[overview-url]: https://kaosumaru.github.io/pureboard/documents/overview.html
+[usage-url]: https://kaosumaru.github.io/pureboard/documents/usage.html
