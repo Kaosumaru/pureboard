@@ -1,8 +1,8 @@
 import { StoreData, Action, createGameStateStore, timeLeftForPlayer } from '../../shared/stores/timerStore';
 import { ComponentContainer } from '../componentContainer';
 import { StandardGameAction, Store } from '../../shared/interface';
-import { GameConstructor } from '../games';
 import { GroupEmitter, IServer } from '../interface';
+import { ComponentConstructor } from '../games';
 
 type ActionType = Action;
 
@@ -14,7 +14,7 @@ export function applyActionOnTimer(ctx: GroupEmitter, id: number, action: Action
   gameContainer.sendServerAction(ctx, id, action);
 }
 
-export function createTimer(cb: TimerCallback, maxTime: number, players: number, perActivationTimeIncrement = 0): GameConstructor {
+export function createTimer(cb: TimerCallback, maxTime: number, players: number, perActivationTimeIncrement = 0): ComponentConstructor {
   let timer: NodeJS.Timeout | undefined;
   const afterActionApplied = (store: Store<StoreData>, id: number, ctx: GroupEmitter, action: Action | StandardGameAction) => {
     if (action.type === 'setActivePlayer') {
