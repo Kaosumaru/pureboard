@@ -66,6 +66,8 @@
     "semantic-release": "^21.0.1",
     "ts-jest": "^29.3.0",
     "ts-node": "^10.2.1",
+    "typedoc": "^0.27.9",
+    "typedoc-github-theme": "^0.2.1",
     "typescript": "^5.7.3"
   },
   "config": {
