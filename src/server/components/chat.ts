@@ -10,11 +10,11 @@ export type ChatMessageCallback = (id: number, user: UserInfo, message: string) 
 const gameContainer = new ComponentContainer<StoreData, ActionType>('chat');
 
 export function createChat(): ComponentConstructor {
-  return gameContainer.addGame(createGameStateStore(), { players: 0 });
+  return gameContainer.createComponent(createGameStateStore(), { players: 0 });
 }
 
 export function createChatWithCallback(callback?: ChatMessageCallback): ComponentConstructor {
-  return gameContainer.addGame(createGameStateStore(), { players: 0 }, (_store, _id, _ctx, action) => {
+  return gameContainer.createComponent(createGameStateStore(), { players: 0 }, (_store, _id, _ctx, action) => {
     if (action.type === 'message' && callback) {
       callback(_id, action.message.user, action.message.message);
     }

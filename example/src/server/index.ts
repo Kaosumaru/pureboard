@@ -1,8 +1,10 @@
 import express from 'express';
 import ViteExpress from 'vite-express';
 import { createServer } from 'pureboard/server/server';
-import { registerConnect4 } from './games/connect4';
 import { UserInfo } from 'pureboard/shared/gameRoomStore';
+import { createGameStateStore } from '@shared/stores/connectFourStore';
+import { createChat } from 'pureboard/server/components/chat';
+import { registerGame } from 'pureboard/server/componentContainer';
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -14,6 +16,9 @@ const server = ViteExpress.listen(app, +PORT, () => {
 
 try {
   const websocketServer = createServer();
+  registerGame(websocketServer, 'connect4', createGameStateStore, {
+    components: [createChat()],
+  });
 
   websocketServer.registerJWTAuth((token: string): Promise<UserInfo | undefined> => {
     return Promise.resolve({
@@ -22,8 +27,6 @@ try {
       isAdmin: false,
     });
   });
-
-  registerConnect4(websocketServer);
 
   server.on('upgrade', (request, socket, head) => {
     if (!request.url) return;

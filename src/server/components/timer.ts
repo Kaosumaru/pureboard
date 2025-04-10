@@ -31,7 +31,7 @@ export function createTimer(cb: TimerCallback, maxTime: number, players: number,
   };
 
   const store = createGameStateStore(maxTime, players, perActivationTimeIncrement);
-  return gameContainer.addGame(store, { players }, afterActionApplied);
+  return gameContainer.createComponent(store, { players }, afterActionApplied);
 }
 
 export function registerTimer(server: IServer): void {
