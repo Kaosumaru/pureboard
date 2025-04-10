@@ -1,6 +1,4 @@
-import { GameRoomClient } from './gameRoomClient';
 import { CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
-import { useCallback, useEffect, useMemo } from 'react';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
 import { ClientRandomGenerator } from './clientRandom';
 import { BaseClient } from './baseClient';
@@ -8,22 +6,12 @@ import { getClientHiddenObjects } from './clientHiddenObjects';
 import { Signal } from 'typed-signals';
 import { GameOptions, StandardGameAction } from '../shared/standardActions';
 import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
-import { IGameRoomClient } from './interface';
-
-export interface IDisposableClient {
-  initialize(): Promise<void>;
-  deinitialize(): void;
-}
-
-export interface IBaseComponentClient {
-  type: string;
-  restartGame(options: GameOptions): Promise<void>;
-}
+import { IBaseComponentClient, IDisposableClient, IGameRoomClient } from './interface';
 
 function createDummyValidation(): CurrentPlayerValidation {
   return {
-    isUser: (_id: string, _name: string) => true,
-    canMoveAsPlayer: (_player: number) => true,
+    isUser: () => true,
+    canMoveAsPlayer: () => true,
     isServerOriginating: () => true,
   };
 }
@@ -123,27 +111,4 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
   type: string;
   random = new ClientRandomGenerator();
   onAfterAction = new Signal<(arg: Action | StandardGameAction) => void>();
-}
-
-type InferAction<T> = T extends BaseComponentClient<any, infer Action, any> ? Action : never;
-
-export function useAfterAction<T extends BaseComponentClient<any, any, any>>(client: T, listener: (action: InferAction<T> | StandardGameAction) => void, deps: any[] = []): void {
-  const cachedListener = useCallback(listener, deps);
-  useEffect(() => {
-    const connection = client.onAfterAction.connect(cachedListener);
-    return () => {
-      connection.disconnect();
-    };
-  }, [client, cachedListener]);
-}
-
-export function useClient<T extends IDisposableClient>(type: { new (client: GameRoomClient): T }, baseClient: GameRoomClient): T {
-  const client = useMemo(() => new type(baseClient), [baseClient]);
-  useEffect(() => {
-    void client.initialize();
-    return () => {
-      client.deinitialize();
-    };
-  }, [client]);
-  return client;
 }

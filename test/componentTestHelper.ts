@@ -1,10 +1,9 @@
 import { TestServer } from './testServer';
 import { CurrentPlayerValidation } from '../src/shared/interface';
 import { overrideComponentContainerValidation } from '../src/server/test/server';
-import { IDisposableClient } from '../src/client/baseComponentClient';
 import { Context } from 'yawr';
 import { closeGame, ComponentConstructor, createGameRoom } from '../src/server/games';
-import { IGameRoomClient } from '../src/client/interface';
+import { IDisposableClient, IGameRoomClient } from '../src/client/interface';
 
 function createComponentValidation(ctx: Context, _gameId: number): CurrentPlayerValidation {
   const userId = ctx.userId ?? '';
