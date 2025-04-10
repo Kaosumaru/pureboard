@@ -1,9 +1,10 @@
 import { TestServer } from './testServer';
 import { CurrentPlayerValidation } from '../src/shared/interface';
 import { overrideComponentContainerValidation } from '../src/server/test/server';
-import { IRoomClient, IDisposableClient } from '../src/client/baseComponentClient';
+import { IDisposableClient } from '../src/client/baseComponentClient';
 import { Context } from 'yawr';
 import { closeGame, ComponentConstructor, createGameRoom } from '../src/server/games';
+import { IGameRoomClient } from '../src/client/interface';
 
 function createComponentValidation(ctx: Context, _gameId: number): CurrentPlayerValidation {
   const userId = ctx.userId ?? '';
@@ -19,7 +20,7 @@ function createComponentValidation(ctx: Context, _gameId: number): CurrentPlayer
 export interface ComponentData<ComponentClient extends IDisposableClient> {
   registerServerComponents: (server: TestServer) => void;
   componentConstructor: ComponentConstructor;
-  clientType: { new (client: IRoomClient): ComponentClient };
+  clientType: { new (client: IGameRoomClient): ComponentClient };
 }
 
 export async function componentTestHelper<ComponentClient extends IDisposableClient>(
