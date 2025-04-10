@@ -24,6 +24,15 @@ TODO
 
 TODO
 
+## Example
+
+See `example` directory for example of a online multiplayer connect4 game.
+
+1. Run `npm install` in root directory
+2. Run `npm install` in the `example` directory
+3. Run `npm run dev` in the `example` directory
+4. Open http://localhost:3000 in your browser
+
 [build-img]: https://github.com/Kaosumaru/pureboard/actions/workflows/release.yml/badge.svg
 [build-url]: https://github.com/Kaosumaru/pureboard/actions/workflows/release.yml
 [downloads-img]: https://img.shields.io/npm/dt/pureboard

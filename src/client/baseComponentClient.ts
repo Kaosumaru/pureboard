@@ -1,5 +1,5 @@
 import { GameRoomClient } from './gameRoomClient';
-import { ActionHiddenObjectInfo, createDummyValidation, GameOptions, StandardGameAction, StateResponseInterface, Store, StoreContainer } from '../shared/interface';
+import { ActionHiddenObjectInfo, CurrentPlayerValidation, GameOptions, StandardGameAction, StateResponseInterface, Store, StoreContainer } from '../shared/interface';
 import { useCallback, useEffect, useMemo } from 'react';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
 import { ClientRandomGenerator } from './clientRandom';
@@ -21,6 +21,14 @@ export interface IBaseComponentClient {
 export interface IComponentClient {
   client: IClient;
   gameId?: number;
+}
+
+function createDummyValidation(): CurrentPlayerValidation {
+  return {
+    isUser: (_id: string, _name: string) => true,
+    canMoveAsPlayer: (_player: number) => true,
+    isServerOriginating: () => true,
+  };
 }
 
 export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseClient implements IDisposableClient, IBaseComponentClient {

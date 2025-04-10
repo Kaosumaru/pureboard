@@ -1,19 +1,10 @@
-import {
-  ActionHiddenObjectInfo,
-  createDummyValidation,
-  createServerValidation,
-  CurrentPlayerValidation,
-  GameOptions,
-  StandardGameAction,
-  StateResponseInterface,
-  Store,
-  StoreContainer,
-} from '../shared/interface';
+import { ActionHiddenObjectInfo, CurrentPlayerValidation, GameOptions, StandardGameAction, StateResponseInterface, Store, StoreContainer } from '../shared/interface';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
 import { createCurrentPlayerValidation, createGameRoomAndJoin, GameConstructor } from './games';
 import { GroupEmitter, IServer } from './interface';
 import { overridenComponentContainerValidation } from './test/server';
+import { createServerValidation } from './utils';
 
 interface IGenericComponent<Data, Action, HiddenType> {
   afterActionApplied(ctx: GroupEmitter, action: Action | StandardGameAction): void;
@@ -45,7 +36,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
       const game = new GenericComponent<Data, ActionType, HiddenObjectType>(container);
 
       const hiddenObjects = this.hasHiddenState ? new HiddenObjectContainer<HiddenObjectType>() : undefined;
-      game.container.action(createDummyValidation(), { type: 'newGame', options }, random, hiddenObjects);
+      game.container.action(createServerValidation(), { type: 'newGame', options }, random, hiddenObjects);
 
       this.games.set(id, game);
       if (hiddenObjects) {

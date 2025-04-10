@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "clean": "rm -rf ./lib/",
+    "docs": "typedoc",
     "cm": "cz",
     "lint": "eslint ./src/ --fix",
     "semantic-release": "semantic-release",
