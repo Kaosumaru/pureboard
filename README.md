@@ -24,9 +24,7 @@ pureboard is a library that allows for easy implementation of multiplayer games,
 
 [Usage][usage-url]
 
-## API
-
-[Link][documentation-url]
+[API][documentation-url]
 
 ## Example
 
