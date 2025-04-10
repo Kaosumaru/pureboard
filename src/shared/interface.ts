@@ -63,6 +63,11 @@ export interface HiddenObjectsData<Type> {
   objects: ObjectsMap<Type>;
 }
 
+/**
+ * Represents a generic store interface for managing state (basically an interface for a zustand store)
+ *
+ * @template StateType - The type of the state managed by the store.
+ */
 export interface Store<StateType> {
   setState(data: StateType, replace: boolean): void;
   getState(): StateType;

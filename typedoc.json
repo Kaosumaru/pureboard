@@ -18,6 +18,8 @@
     ],
     "projectDocuments": [
         "documents/overview.md",
+        "documents/usage.md",
+        "documents/reducer.md",
         "documents/examples.md"
     ]
 }
