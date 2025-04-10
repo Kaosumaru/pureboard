@@ -67,6 +67,18 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     this.applyAction(ctx, gameId, action, validation);
   }
 
+  registerServerWithCreation(server: IServer, storeConstructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
+    this.registerServer(server);
+    server.RegisterFunction(this.type + '/createGame', (ctx, options: GameOptions) => {
+      let components: ComponentConstructor[] = [this.createComponent(storeConstructor(), options, settings.afterAction)];
+      if (settings.components) {
+        components = components.concat(settings.components);
+      }
+
+      return createGameRoomAndJoin(ctx, options, this.type, components, settings.timeout ?? emptyRoomLifetime);
+    });
+  }
+
   registerServer(server: IServer): void {
     const validationFunction = overridenComponentContainerValidation ?? createCurrentPlayerValidation;
     server.RegisterFunction(this.type + '/action', (ctx, gameId: number, action: ActionType | StandardGameAction) => {
@@ -133,16 +145,7 @@ export function registerGame<Data, ActionType extends IAction, HiddenObjectType 
   settings: ICreationSettings<Data, ActionType>
 ): void {
   const gameContainer = new ComponentContainer<Data, ActionType, HiddenObjectType>(type);
-
-  gameContainer.registerServer(server);
-  server.RegisterFunction(type + '/createGame', (ctx, options: GameOptions) => {
-    let components: ComponentConstructor[] = [gameContainer.createComponent(storeConstructor(), options, settings.afterAction)];
-    if (settings.components) {
-      components = components.concat(settings.components);
-    }
-
-    return createGameRoomAndJoin(ctx, options, type, components, settings.timeout ?? emptyRoomLifetime);
-  });
+  gameContainer.registerServerWithCreation(server, storeConstructor, settings);
 }
 export interface ICreationSettings<StateType, ActionType> {
   components?: ComponentConstructor[];
