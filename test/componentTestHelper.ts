@@ -1,7 +1,7 @@
 import { TestServer } from './testServer';
 import { CurrentPlayerValidation } from '../src/shared/interface';
 import { overrideComponentContainerValidation } from '../src/server/test/server';
-import { IComponentClient, IDisposableClient } from '../src/client/baseComponentClient';
+import { IRoomClient, IDisposableClient } from '../src/client/baseComponentClient';
 import { Context } from 'yawr';
 import { closeGame, ComponentConstructor, createGameRoom } from '../src/server/games';
 
@@ -19,7 +19,7 @@ function createComponentValidation(ctx: Context, _gameId: number): CurrentPlayer
 export interface ComponentData<ComponentClient extends IDisposableClient> {
   registerServerComponents: (server: TestServer) => void;
   componentConstructor: ComponentConstructor;
-  clientType: { new (client: IComponentClient): ComponentClient };
+  clientType: { new (client: IRoomClient): ComponentClient };
 }
 
 export async function componentTestHelper<ComponentClient extends IDisposableClient>(

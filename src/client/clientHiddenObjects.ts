@@ -1,4 +1,5 @@
-import { ActionHiddenObjectInfo, IHiddenObjects } from '../shared/interface';
+import { IHiddenObjects } from '../shared/interface';
+import { ActionHiddenObjectInfo } from '../shared/internalInterface';
 
 export function getClientHiddenObjects<Type>(hiddenInfo?: ActionHiddenObjectInfo<Type>): IHiddenObjects<Type> | undefined {
   if (!hiddenInfo) {

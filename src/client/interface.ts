@@ -13,3 +13,8 @@ export interface IClient {
   onDisconnected: Signal<(error: any) => void>;
   onAuthorized: Signal<(error: any) => void>;
 }
+
+export interface IGameRoomClient {
+  client: IClient;
+  gameId?: number;
+}

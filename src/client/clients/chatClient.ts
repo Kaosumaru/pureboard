@@ -1,9 +1,10 @@
 import { Action, StoreData, createGameStateStore } from '../../shared/stores/chatStore';
-import { BaseComponentClient, IComponentClient } from '../baseComponentClient';
+import { BaseComponentClient } from '../baseComponentClient';
 import { Signal } from 'typed-signals';
+import { IGameRoomClient } from '../interface';
 
 export class ChatClient extends BaseComponentClient<StoreData, Action> {
-  constructor(gameRoomClient: IComponentClient) {
+  constructor(gameRoomClient: IGameRoomClient) {
     super(createGameStateStore(), 'chat', gameRoomClient);
   }
 

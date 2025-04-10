@@ -1,3 +1,6 @@
+import { ObjectsMap } from './internalInterface';
+import { StandardGameAction } from './standardActions';
+
 /**
  * Interface representing the validation logic for a player in a game.
  * This validation determines, if user is allowed to make a move for player in the game.
@@ -54,17 +57,16 @@ export interface RandomGenerator {
 }
 
 /**
- * Interface representing id -> object mapping.
- */
-export type ObjectsMap<Type> = {
-  [id: number]: Type;
-};
-
-/**
  * Interface representing the state of hidden objects in a game.
  */
 export interface HiddenObjectsData<Type> {
   objects: ObjectsMap<Type>;
+}
+
+export interface Store<StateType> {
+  setState(data: StateType, replace: boolean): void;
+  getState(): StateType;
+  <T>(cb: (state: StateType) => T): T;
 }
 
 /**
@@ -108,42 +110,22 @@ export interface IHiddenObjects<T> {
   clearObjects(): void;
 }
 
-export interface IHiddenObjectWrapper<Type> {
-  object: Type;
-  visibleOnlyTo?: number;
-}
-
-export type IHiddenObjectWrapperMap<Type> = {
-  [id: number]: IHiddenObjectWrapper<Type> | null;
-};
-
-export interface StateResponseInterface<Data, HiddenType> {
-  state: Data;
-  hidden?: IHiddenObjectWrapperMap<HiddenType>;
-}
-
-export interface ActionHiddenObjectInfo<HiddenType> {
-  delta: IHiddenObjectWrapperMap<HiddenType>;
-  responses: [number, HiddenType][];
-}
-
-export interface NewGameAction {
-  type: 'newGame';
-  options: GameOptions;
-}
-
-export type StandardGameAction = NewGameAction;
-
-export interface GameOptions {
-  players: number;
-}
-
-export interface Store<StateType> {
-  setState(data: StateType, replace: boolean): void;
-  getState(): StateType;
-  <T>(cb: (state: StateType) => T): T;
-}
-
+/**
+ * Represents a container for managing a store and handling actions within a game or application.
+ *
+ * @template StateType - The type representing the state managed by the store.
+ * @template ActionType - The type representing the actions that can be dispatched.
+ * @template HiddenType - The type representing hidden objects, defaults to `any`.
+ *
+ * @property store - The store instance that manages the application state.
+ * @property action - A reducer - function that processes actions, and returns a new state.
+ *                    It typically validates the current player, and optionally interacts with hidden objects and a random generator.
+ *
+ * @param playerValidation - The validation object for the current player.
+ * @param action - The action to be processed, which can be of type `ActionType` or `StandardGameAction`.
+ * @param random - A random generator instance used for randomness in the action.
+ * @param objects - Optional hidden objects of type `IHiddenObjects<HiddenType>`.
+ */
 export interface StoreContainer<StateType, ActionType, HiddenType = any> {
   store: Store<StateType>;
   action: (playerValidation: CurrentPlayerValidation, action: ActionType | StandardGameAction, random: RandomGenerator, objects?: IHiddenObjects<HiddenType>) => void;

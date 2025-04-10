@@ -1,10 +1,12 @@
-import { ActionHiddenObjectInfo, CurrentPlayerValidation, GameOptions, StandardGameAction, StateResponseInterface, Store, StoreContainer } from '../shared/interface';
+import { CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
 import { Component, ComponentConstructor, createCurrentPlayerValidation, createGameRoomAndJoin, getGameComponent } from './games';
 import { GroupEmitter, IServer } from './interface';
 import { overridenComponentContainerValidation } from './test/server';
 import { createServerValidation } from './utils';
+import { GameOptions, StandardGameAction } from '../shared/standardActions';
+import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
 
 interface IGenericComponent<Data, Action, HiddenType> {
   afterActionApplied(ctx: GroupEmitter, action: Action | StandardGameAction): void;

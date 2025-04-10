@@ -1,8 +1,9 @@
 import { canUserMoveAsPlayer, GameRoomData, UserInfo } from '../shared/gameRoomStore';
 import { Context } from 'yawr';
-import { CurrentPlayerValidation, GameOptions } from '../shared/interface';
+import { CurrentPlayerValidation } from '../shared/interface';
 import { generate as generateRandomString } from 'randomstring';
 import { IServer } from './interface';
+import { GameOptions } from '../shared/standardActions';
 
 export type ComponentConstructor = (id: number) => [string, never];
 export type Component = [string, never];

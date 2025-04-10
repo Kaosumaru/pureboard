@@ -1,12 +1,14 @@
 import { GameRoomClient } from './gameRoomClient';
-import { ActionHiddenObjectInfo, CurrentPlayerValidation, GameOptions, StandardGameAction, StateResponseInterface, Store, StoreContainer } from '../shared/interface';
+import { CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
 import { useCallback, useEffect, useMemo } from 'react';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
 import { ClientRandomGenerator } from './clientRandom';
 import { BaseClient } from './baseClient';
 import { getClientHiddenObjects } from './clientHiddenObjects';
 import { Signal } from 'typed-signals';
-import { IClient } from './interface';
+import { GameOptions, StandardGameAction } from '../shared/standardActions';
+import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
+import { IGameRoomClient } from './interface';
 
 export interface IDisposableClient {
   initialize(): Promise<void>;
@@ -16,11 +18,6 @@ export interface IDisposableClient {
 export interface IBaseComponentClient {
   type: string;
   restartGame(options: GameOptions): Promise<void>;
-}
-
-export interface IComponentClient {
-  client: IClient;
-  gameId?: number;
 }
 
 function createDummyValidation(): CurrentPlayerValidation {
@@ -37,7 +34,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
   public hiddenObjectsStore: Store<HiddenObjectsState<HiddenType>>;
   protected gameId: number;
 
-  constructor(container: StoreContainer<Data, Action, HiddenType>, type: string, client: IComponentClient) {
+  constructor(container: StoreContainer<Data, Action, HiddenType>, type: string, client: IGameRoomClient) {
     if (client.gameId === undefined) throw new Error('GameId is not set');
     super(client.client);
 

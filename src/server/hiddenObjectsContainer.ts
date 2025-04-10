@@ -1,4 +1,5 @@
-import { CurrentPlayerValidation, IHiddenObjects, IHiddenObjectWrapper, IHiddenObjectWrapperMap } from '../shared/interface';
+import { CurrentPlayerValidation, IHiddenObjects } from '../shared/interface';
+import { IHiddenObjectWrapper, IHiddenObjectWrapperMap } from '../shared/internalInterface';
 
 export class HiddenObjectContainer<Type> implements IHiddenObjects<Type> {
   private hiddenObjects = new Map<number, IHiddenObjectWrapper<Type>>();

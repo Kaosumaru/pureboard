@@ -4,7 +4,15 @@
     ],
     "out": "./docs",
     "entryPoints": [
-        "./src/shared/interface.ts"
+        "./src/shared/interface.ts",
+        "./src/shared/standardActions.ts",
+
+        "./src/client/gameRoomClient.ts",
+        "./src/client/baseComponentClient.ts",
+        "./src/client/baseGameClient.ts",
+
+        "./src/server/interface.ts",
+        "./src/server/games.ts",
     ],
     "projectDocuments": [
         "documents/overview.md",

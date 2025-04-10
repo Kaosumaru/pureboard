@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension'; // required for devtools typing
-import { HiddenObjectsData, IHiddenObjectWrapperMap, ObjectsMap, Store } from './interface';
+import { HiddenObjectsData, Store } from './interface';
+import { IHiddenObjectWrapperMap, ObjectsMap } from './internalInterface';
 
 export interface HiddenObjectsState<Type> extends HiddenObjectsData<Type> {
   setState: (data: IHiddenObjectWrapperMap<Type>) => void;

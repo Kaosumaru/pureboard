@@ -1,12 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension'; // required for devtools typing
-import {
-  CurrentPlayerValidation,
-  RandomGenerator,
-  StandardGameAction,
-  StoreContainer,
-} from 'pureboard/shared/interface';
+import { CurrentPlayerValidation, RandomGenerator, StoreContainer } from 'pureboard/shared/interface';
+import { StandardGameAction } from 'pureboard/shared/standardActions';
 
 export enum FieldType {
   Empty,

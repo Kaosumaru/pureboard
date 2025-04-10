@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension'; // required for devtools typing
-import { CurrentPlayerValidation, RandomGenerator, StandardGameAction, StoreContainer } from '../interface';
+import { CurrentPlayerValidation, RandomGenerator, StoreContainer } from '../interface';
+import { StandardGameAction } from '../standardActions';
 
 export interface SetActivePlayerAction {
   type: 'setActivePlayer';
