@@ -18,7 +18,7 @@ export interface GameRoomData {
   id: number;
   seats: (UserInfo | null)[];
   type: string;
-  timeoutToClose: number;
+  timeoutToClose?: number;
   closed: boolean;
   password?: string;
 }

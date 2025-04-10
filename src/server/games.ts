@@ -4,17 +4,30 @@ import { CurrentPlayerValidation, GameOptions } from '../shared/interface';
 import { generate as generateRandomString } from 'randomstring';
 import { IServer } from './interface';
 
+export type ComponentConstructor = (id: number) => [string, never];
+export type Component = [string, never];
+type ComponentsMap = { [id: string]: never };
+
 interface GameRoom {
   data: GameRoomData;
   joinedPlayers: Map<string, number>;
+  components: ComponentsMap;
+}
+
+function arrayToComponents(id: number, arr: ComponentConstructor[]): ComponentsMap {
+  const result: ComponentsMap = {};
+  for (const constructor of arr) {
+    const [key, component] = constructor(id);
+    result[key] = component;
+  }
+  return result;
 }
 
 const games = new Map<number, GameRoom>();
-const destructors = new Map<number, (id: number) => void>();
 let lastId = 0;
 
 export function createCurrentPlayerValidation(ctx: Context, gameId: number): CurrentPlayerValidation {
-  const game = getGameRoom(ctx, gameId);
+  const game = getGameRoomData(ctx, gameId);
   const userId = ctx.userId ?? '';
   const userName = ctx.userName ?? '';
 
@@ -39,7 +52,15 @@ function userInfoFromContext(ctx: Context): UserInfo {
   return { id: ctx.userId ?? '', name: ctx.userName ?? '' };
 }
 
-function getGameRoom(ctx: Context, gameId: number): GameRoomData {
+export function getGameComponent<T>(gameId: number, type: string): T {
+  const game = games.get(gameId);
+  if (!game) throw new Error('Game not found');
+  const component = game.components[type];
+  if (!component) throw new Error('Component not found');
+  return component;
+}
+
+function getGameRoomData(ctx: Context, gameId: number): GameRoomData {
   if (ctx.userId === undefined) throw new Error('Not authorized');
   const game = games.get(gameId);
   if (!game) throw new Error('Game not found');
@@ -58,10 +79,24 @@ function joinGame(ctx: Context, gameId: number, password?: string): GameRoomData
   return game.data;
 }
 
-type Destructor = (id: number) => void;
-export type GameConstructor = (id: number) => Destructor;
+export function createGameRoomAndJoin(ctx: Context, options: GameOptions, type: string, components: ComponentConstructor[], timeout: number): GameRoomData {
+  const gameRoom = createGameRoom(options, type, components, timeout);
 
-export function createGameRoomAndJoin(ctx: Context, options: GameOptions, type: string, constructors: GameConstructor[], timeout: number): GameRoomData {
+  gameRoom.joinedPlayers.set(ctx.userId ?? '', 1);
+  ctx.addToGroup(groupOf(gameRoom.data));
+
+  return gameRoom.data;
+}
+
+export function closeGame(gameId: number): GameRoom | undefined {
+  const game = games.get(gameId);
+  if (!game) return undefined;
+
+  games.delete(gameId);
+  return game;
+}
+
+export function createGameRoom(options: GameOptions, type: string, components: ComponentConstructor[], timeout?: number): GameRoom {
   lastId++;
   const id = lastId;
 
@@ -74,32 +109,35 @@ export function createGameRoomAndJoin(ctx: Context, options: GameOptions, type: 
     closed: false,
     password: generateRandomString({ length: 8, charset: 'alphanumeric', capitalization: 'lowercase' }),
   };
+
   const game: GameRoom = {
     data,
-    joinedPlayers: new Map<string, number>([[ctx.userId ?? '', 1]]),
+    joinedPlayers: new Map<string, number>(),
+    components: arrayToComponents(id, components),
   };
-  ctx.addToGroup(groupOf(data));
+
   games.set(id, game);
 
-  const ds = constructors.map(constructor => constructor(id));
-  destructors.set(id, i => {
-    ds.forEach(destructor => destructor(i));
-  });
-
-  return data;
+  return game;
 }
 
 export function registerGames(server: IServer): void {
   const deleteGame = (gameId: number) => {
-    const game = games.get(gameId);
+    const game = closeGame(gameId);
     if (!game) return;
-
-    games.delete(gameId);
-    const destructor = destructors.get(gameId);
-    if (destructor) destructor(gameId);
-    destructors.delete(gameId);
-
     server.onGroupRemoved(groupOf(game.data), undefined);
+  };
+
+  const createTimeoutDelete = (gameId: number, group: string, timeout?: number) => {
+    // delete the room if it's empty for emptyRoomLifetime
+    if (timeout === undefined) return;
+    server.onGroupRemoved(group, () =>
+      setTimeout(() => {
+        if (server.groupMemberCount(group) === 0) {
+          deleteGame(gameId);
+        }
+      }, timeout)
+    );
   };
 
   server.RegisterFunction('game/join', (ctx, gameId: number, password?: string) => {
@@ -108,7 +146,7 @@ export function registerGames(server: IServer): void {
   });
 
   server.RegisterFunction('game/takeSeat', (ctx, gameId: number, seat: number) => {
-    const game = getGameRoom(ctx, gameId);
+    const game = getGameRoomData(ctx, gameId);
     if (game.seats[seat]) throw new Error('Seat is taken');
 
     const userInfo = userInfoFromContext(ctx);
@@ -118,18 +156,11 @@ export function registerGames(server: IServer): void {
     const group = groupOf(game);
     ctx.emitToGroup(group, 'game/tookSeat', gameId, userInfo, seat);
 
-    // delete the room if it's empty for emptyRoomLifetime
-    server.onGroupRemoved(group, () =>
-      setTimeout(() => {
-        if (server.groupMemberCount(group) === 0) {
-          deleteGame(gameId);
-        }
-      }, game.timeoutToClose)
-    );
+    createTimeoutDelete(gameId, group, game.timeoutToClose);
   });
 
   server.RegisterFunction('game/leaveSeat', (ctx, gameId: number, seat: number) => {
-    const game = getGameRoom(ctx, gameId);
+    const game = getGameRoomData(ctx, gameId);
     if (game.seats[seat]?.id !== ctx.userId) throw new Error('Not authorized');
 
     game.seats[seat] = null;
@@ -138,7 +169,7 @@ export function registerGames(server: IServer): void {
   });
 
   server.RegisterFunction('game/takeAvailableSeat', (ctx, gameId: number) => {
-    const game = getGameRoom(ctx, gameId);
+    const game = getGameRoomData(ctx, gameId);
     const alreadySeated = game.seats.findIndex(userId => userId?.id == ctx.userId);
     if (alreadySeated !== -1) return alreadySeated;
     const seat = game.seats.findIndex(userId => !userId);
@@ -150,27 +181,19 @@ export function registerGames(server: IServer): void {
     const group = groupOf(game);
     ctx.emitToGroup(group, 'game/tookSeat', gameId, userInfo, seat);
 
-    // delete the room if it's empty for emptyRoomLifetime
-    server.onGroupRemoved(group, () =>
-      setTimeout(() => {
-        if (server.groupMemberCount(group) === 0) {
-          deleteGame(gameId);
-        }
-      }, game.timeoutToClose)
-    );
-
+    createTimeoutDelete(gameId, group, game.timeoutToClose);
     return seat;
   });
 
   server.RegisterFunction('game/getSeatsState', (ctx, gameId: number) => {
-    return getGameRoom(ctx, gameId);
+    return getGameRoomData(ctx, gameId);
   });
 
   server.RegisterFunction('game/close', (ctx, gameId: number) => {
     if (!ctx.isAdmin) {
       throw new Error('Not authorized');
     }
-    const game = getGameRoom(ctx, gameId);
+    const game = getGameRoomData(ctx, gameId);
     deleteGame(gameId);
 
     const group = groupOf(game);

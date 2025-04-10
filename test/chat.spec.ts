@@ -1,16 +1,16 @@
 import { ChatClient } from '../src/client/clients/chatClient';
 import { createChat, createChatWithCallback, registerChat } from '../src/server/components/chat';
-import { GameConstructor } from '../src/server/games';
+import { ComponentConstructor } from '../src/server/games';
 import { Message } from '../src/shared/stores/chatStore';
 import { componentTestHelper } from './componentTestHelper';
 
-function testChat(componentCreator: GameConstructor, testCallback: (chatClient: ChatClient) => Promise<void>) {
+function testChat(componentConstructor: ComponentConstructor, testCallback: (chatClient: ChatClient) => Promise<void>) {
   return componentTestHelper(
     {
       registerServerComponents: server => {
         registerChat(server);
       },
-      componentCreator,
+      componentConstructor: componentConstructor,
       clientType: ChatClient,
     },
     testCallback

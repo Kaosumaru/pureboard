@@ -7,6 +7,6 @@ const gameContainer = new ComponentContainer<StoreData, Action>('connect4');
 
 export function registerConnect4(server: IServer): void {
   gameContainer.registerServerWithCreation(server, createGameStateStore, {
-    components: () => [createChat()],
+    components: [createChat()],
   });
 }

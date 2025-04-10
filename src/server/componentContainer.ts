@@ -1,7 +1,7 @@
 import { ActionHiddenObjectInfo, CurrentPlayerValidation, GameOptions, StandardGameAction, StateResponseInterface, Store, StoreContainer } from '../shared/interface';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
-import { createCurrentPlayerValidation, createGameRoomAndJoin, GameConstructor } from './games';
+import { Component, ComponentConstructor, createCurrentPlayerValidation, createGameRoomAndJoin, getGameComponent } from './games';
 import { GroupEmitter, IServer } from './interface';
 import { overridenComponentContainerValidation } from './test/server';
 import { createServerValidation } from './utils';
@@ -16,14 +16,17 @@ export interface IAction {
   type: string;
 }
 
+interface ComponentData<Data, ActionType extends IAction, HiddenObjectType = any> {
+  game: IGenericComponent<Data, ActionType, HiddenObjectType>;
+  hiddenObjects?: HiddenObjectContainer<HiddenObjectType>;
+}
+
 const random = new ServerRandomGenerator();
 
 const groupOf = (id: number) => `game/${id}`;
 type AfterActionType<StateType, ActionType> = (store: Store<StateType>, id: number, ctx: GroupEmitter, action: ActionType | StandardGameAction) => void;
 
 export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectType = any> {
-  protected objects = new Map<number, HiddenObjectContainer<HiddenObjectType>>();
-  protected games = new Map<number, IGenericComponent<Data, ActionType, HiddenObjectType>>();
   protected hasHiddenState: boolean;
 
   constructor(type: string, hasHiddenState = false) {
@@ -32,40 +35,31 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
   }
 
   addGame(container: StoreContainer<Data, ActionType, HiddenObjectType>, options: GameOptions, afterAction?: AfterActionType<Data, ActionType>) {
-    return (id: number): (() => void) => {
+    return (id: number): Component => {
       const game = new GenericComponent<Data, ActionType, HiddenObjectType>(container);
 
       const hiddenObjects = this.hasHiddenState ? new HiddenObjectContainer<HiddenObjectType>() : undefined;
       game.container.action(createServerValidation(), { type: 'newGame', options }, random, hiddenObjects);
 
-      this.games.set(id, game);
-      if (hiddenObjects) {
-        this.objects.set(id, hiddenObjects);
-      }
       if (afterAction) {
         game.afterActionCallback = (ctx, action) => afterAction(container.store, id, ctx, action);
       }
 
-      return () => {
-        this.deleteGame(id);
+      const data: ComponentData<Data, ActionType, HiddenObjectType> = {
+        game,
+        hiddenObjects,
       };
+
+      return [this.type, data as never];
     };
   }
 
-  deleteGame(id: number): void {
-    this.games.delete(id);
-  }
-
   getContainer(id: number): StoreContainer<Data, ActionType, HiddenObjectType> {
-    return this.get(id).container;
+    return this.get(id).game.container;
   }
 
-  protected get(id: number): IGenericComponent<Data, ActionType, HiddenObjectType> {
-    const game = this.games.get(id);
-    if (!game) {
-      throw new Error('Game not found');
-    }
-    return game;
+  protected get(id: number): ComponentData<Data, ActionType, HiddenObjectType> {
+    return getGameComponent<ComponentData<Data, ActionType, HiddenObjectType>>(id, this.type);
   }
 
   sendServerAction(ctx: GroupEmitter, gameId: number, action: ActionType): void {
@@ -82,10 +76,10 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
 
     server.RegisterFunction(this.type + '/getGameState', (ctx, gameId: number) => {
       const validation = validationFunction(ctx, gameId);
-      const game = this.get(gameId);
+      const gameData = this.get(gameId);
       return {
-        state: game?.container.store.getState(),
-        hidden: this.objects.get(gameId)?.getState(validation),
+        state: gameData.game.container.store.getState(),
+        hidden: gameData.hiddenObjects?.getState(validation),
       } satisfies StateResponseInterface<Data, HiddenObjectType>;
     });
   }
@@ -93,9 +87,9 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
   registerServerWithCreation(server: IServer, constructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
     this.registerServer(server);
     server.RegisterFunction(this.type + '/createGame', (ctx, options: GameOptions) => {
-      let components: GameConstructor[] = [this.addGame(constructor(), options, settings.afterAction)];
+      let components: ComponentConstructor[] = [this.addGame(constructor(), options, settings.afterAction)];
       if (settings.components) {
-        components = components.concat(settings.components(options));
+        components = components.concat(settings.components);
       }
 
       return createGameRoomAndJoin(ctx, options, this.type, components, settings.timeout ?? emptyRoomLifetime);
@@ -109,11 +103,11 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
   private applyAction(ctx: GroupEmitter, gameId: number, action: ActionType | StandardGameAction, validation: CurrentPlayerValidation) {
     this.beforeActionAplied(ctx, gameId, action, validation);
 
-    const game = this.get(gameId);
-    const objs = this.objects.get(gameId);
+    const gameData = this.get(gameId);
+    const objs = gameData.hiddenObjects;
 
     try {
-      game.container.action(validation, action, random, objs);
+      gameData.game.container.action(validation, action, random, objs);
     } catch (e) {
       objs?.revertDelta();
       throw e;
@@ -136,7 +130,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
       ctx.emitToGroup(groupOf(gameId), this.type + '/onAction', gameId, action, seed);
     }
 
-    game.afterActionApplied(ctx, action);
+    gameData.game.afterActionApplied(ctx, action);
   }
 
   type: string;
@@ -145,7 +139,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
 const emptyRoomLifetime = 1000 * 60 * 5;
 
 export interface ICreationSettings<StateType, ActionType> {
-  components?: (options: GameOptions) => GameConstructor[];
+  components?: ComponentConstructor[];
   afterAction?: AfterActionType<StateType, ActionType>;
   timeout?: number;
 }
