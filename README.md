@@ -22,7 +22,7 @@ TODO
 
 ## API
 
-TODO
+[Link][documentation-url]
 
 ## Example
 
@@ -47,3 +47,4 @@ See `example` directory for example of a online multiplayer connect4 game.
 [semantic-release-url]: https://github.com/semantic-release/semantic-release
 [commitizen-img]: https://img.shields.io/badge/commitizen-friendly-brightgreen.svg
 [commitizen-url]: http://commitizen.github.io/cz-cli/
+[documentation-url]: https://kaosumaru.github.io/pureboard/

@@ -14,5 +14,6 @@ It uses `zustand` for state management, so replicated state on client can be eas
 
 ## Glossary
 
-`State` - state managed by zustand that has a reducer function which accepts `Action`
+`State` - state managed by zustand that has a reducer function which accepts
+
 `Action` - definition of a move that player can do to change the game state
