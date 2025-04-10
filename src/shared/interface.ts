@@ -127,11 +127,11 @@ export interface IHiddenObjects<T> {
  *                    It typically validates the current player, and optionally interacts with hidden objects and a random generator.
  *
  * @param playerValidation - The validation object for the current player.
- * @param action - The action to be processed, which can be of type `ActionType` or `StandardGameAction`.
+ * @param reducer - The action to be processed, which can be of type `ActionType` or `StandardGameAction`.
  * @param random - A random generator instance used for randomness in the action.
  * @param objects - Optional hidden objects of type `IHiddenObjects<HiddenType>`.
  */
 export interface StoreContainer<StateType, ActionType, HiddenType = any> {
   store: Store<StateType>;
-  action: (playerValidation: CurrentPlayerValidation, action: ActionType | StandardGameAction, random: RandomGenerator, objects?: IHiddenObjects<HiddenType>) => void;
+  reducer: (playerValidation: CurrentPlayerValidation, action: ActionType | StandardGameAction, random: RandomGenerator, objects?: IHiddenObjects<HiddenType>) => void;
 }

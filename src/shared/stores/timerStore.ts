@@ -64,7 +64,7 @@ export function createGameStateStore(maxTimeInSeconds: number, players: number, 
   );
   return {
     store,
-    action: (playerValidation: CurrentPlayerValidation, action: Action | StandardGameAction, _: RandomGenerator) => store.setState(store => makeAction(playerValidation, store, action)),
+    reducer: (playerValidation: CurrentPlayerValidation, action: Action | StandardGameAction, _: RandomGenerator) => store.setState(store => makeAction(playerValidation, store, action)),
   };
 }
 

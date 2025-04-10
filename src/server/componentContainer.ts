@@ -41,7 +41,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
       const game = new GenericComponent<Data, ActionType, HiddenObjectType>(container);
 
       const hiddenObjects = this.hasHiddenState ? new HiddenObjectContainer<HiddenObjectType>() : undefined;
-      game.container.action(createServerValidation(), { type: 'newGame', options }, random, hiddenObjects);
+      game.container.reducer(createServerValidation(), { type: 'newGame', options }, random, hiddenObjects);
 
       if (afterAction) {
         game.afterActionCallback = (ctx, action) => afterAction(container.store, id, ctx, action);
@@ -109,7 +109,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     const objs = gameData.hiddenObjects;
 
     try {
-      gameData.game.container.action(validation, action, random, objs);
+      gameData.game.container.reducer(validation, action, random, objs);
     } catch (e) {
       objs?.revertDelta();
       throw e;

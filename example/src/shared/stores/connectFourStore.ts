@@ -102,8 +102,11 @@ export function createGameStateStore(): StoreContainer<StoreData, Action | Stand
 
   return {
     store: useGameStateStore,
-    action: (playerValidation: CurrentPlayerValidation, action: Action | StandardGameAction, random: RandomGenerator) =>
-      useGameStateStore.setState(store => makeAction(playerValidation, store, action, random)),
+    reducer: (
+      playerValidation: CurrentPlayerValidation,
+      action: Action | StandardGameAction,
+      random: RandomGenerator
+    ) => useGameStateStore.setState(store => makeAction(playerValidation, store, action, random)),
   };
 }
 

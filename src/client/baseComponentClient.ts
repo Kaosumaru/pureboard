@@ -48,7 +48,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
 
       this.random.setSeed(seed !== null ? seed : undefined);
       try {
-        this.container.action(validation, action, this.random, getClientHiddenObjects(hiddenInfo));
+        this.container.reducer(validation, action, this.random, getClientHiddenObjects(hiddenInfo));
       } catch (err) {
         console.error(`While trying to apply action, from server:\n ${String(err)}`);
         throw err;
