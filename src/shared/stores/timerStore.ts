@@ -1,8 +1,5 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension'; // required for devtools typing
-import { CurrentPlayerValidation, RandomGenerator, StoreContainer } from '../interface';
-import { StandardGameAction } from '../standardActions';
+import { createStoreContainer, CurrentPlayerValidation, Reducer } from '../interface';
 
 export interface SetActivePlayerAction {
   type: 'setActivePlayer';
@@ -51,21 +48,28 @@ export function timeLeftForPlayer(data: StoreData, player: number): number {
   return timeLeft > 0 ? timeLeft : 0;
 }
 
-export function createGameStateStore(maxTimeInSeconds: number, players: number, perActivationTimeIncrement = 0): StoreContainer<StoreData, Action> {
-  const store = create<StoreData>()(
-    devtools(
-      (): StoreData => ({
-        activePlayer: undefined,
-        maxTime: maxTimeInSeconds * 1000,
-        perActivationTimeIncrement,
-        players: createPlayers(players),
-      })
-    )
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function createGameStateStore(maxTimeInSeconds: number, players: number, perActivationTimeIncrement = 0) {
+  return createStoreContainer<StoreData, Reducer<StoreData>>(
+    {
+      activePlayer: undefined,
+      maxTime: maxTimeInSeconds * 1000,
+      perActivationTimeIncrement,
+      players: createPlayers(players),
+    },
+    1,
+    ctx => ({
+      setActivePlayer: (data: StoreData, player: number | undefined) => {
+        return setActivePlayer(ctx.playerValidation, data, player);
+      },
+      restart: (data: StoreData) => {
+        return { ...data, activePlayer: undefined, players: createPlayers(data.players.length) };
+      },
+      newGame: (data: StoreData) => {
+        return { ...data };
+      },
+    })
   );
-  return {
-    store,
-    reducer: (playerValidation: CurrentPlayerValidation, action: Action | StandardGameAction, _: RandomGenerator) => store.setState(store => makeAction(playerValidation, store, action)),
-  };
 }
 
 function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreData, player: number | undefined): StoreData {
@@ -91,15 +95,4 @@ function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreD
     activePlayer: player,
     players: newPlayers,
   };
-}
-
-function makeAction(playerValidation: CurrentPlayerValidation, store: StoreData, action: Action | StandardGameAction): StoreData | Partial<StoreData> {
-  switch (action.type) {
-    case 'setActivePlayer':
-      return setActivePlayer(playerValidation, store, action.player);
-    case 'restart':
-      return { ...store, activePlayer: undefined, players: createPlayers(store.players.length) };
-    case 'newGame':
-      return { ...store };
-  }
 }

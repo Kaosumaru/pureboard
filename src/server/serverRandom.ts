@@ -1,7 +1,7 @@
-import { RandomGenerator } from '../shared/interface';
+import { IRandomGenerator } from '../shared/interface';
 import { create, RandomSeed } from 'random-seed';
 
-export class ServerRandomGenerator implements RandomGenerator {
+export class ServerRandomGenerator implements IRandomGenerator {
   int(max: number): number {
     if (!this.randomSeed) {
       this.regenerateSeed();

@@ -1,5 +1,7 @@
 import { ObjectsMap } from './internalInterface';
-import { StandardGameAction } from './standardActions';
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension'; // required for devtools typing
 
 /**
  * Interface representing the validation logic for a player in a game.
@@ -37,7 +39,7 @@ export interface CurrentPlayerValidation {
  * On client, the random number generator is seeded with the same seed as the server.
  * This way, the client and server will generate the same random numbers for a given action.
  */
-export interface RandomGenerator {
+export interface IRandomGenerator {
   /**
    * Generates a random integer between 0 (inclusive) and the specified maximum value (exclusive).
    *
@@ -115,23 +117,27 @@ export interface IHiddenObjects<T> {
   clearObjects(): void;
 }
 
-/**
- * Represents a container for managing a store and handling actions within a game or application.
- *
- * @template StateType - The type representing the state managed by the store.
- * @template ActionType - The type representing the actions that can be dispatched.
- * @template HiddenType - The type representing hidden objects, defaults to `any`.
- *
- * @property store - The store instance that manages the application state.
- * @property action - A reducer - function that processes actions, and returns a new state.
- *                    It typically validates the current player, and optionally interacts with hidden objects and a random generator.
- *
- * @param playerValidation - The validation object for the current player.
- * @param reducer - The action to be processed, which can be of type `ActionType` or `StandardGameAction`.
- * @param random - A random generator instance used for randomness in the action.
- * @param objects - Optional hidden objects of type `IHiddenObjects<HiddenType>`.
- */
-export interface StoreContainer<StateType, ActionType, HiddenType = any> {
+export interface IContext<HiddenType> {
+  playerValidation: CurrentPlayerValidation;
+  random: IRandomGenerator;
+  objects?: IHiddenObjects<HiddenType>;
+}
+
+export interface Reducer<StateType> {
+  [key: string]: (state: StateType, ...args: any[]) => StateType;
+}
+
+export interface StoreContainer<StateType, ReducerType extends Reducer<StateType>, HiddenType = any> {
   store: Store<StateType>;
-  reducer: (playerValidation: CurrentPlayerValidation, action: ActionType | StandardGameAction, random: RandomGenerator, objects?: IHiddenObjects<HiddenType>) => void;
+  reducer: (ctx: IContext<HiddenType>) => ReducerType;
+  version: number;
+}
+
+export function createStoreContainer<StateType, ReducerType extends Reducer<StateType>, HiddenType = any>(
+  state: StateType,
+  version: number,
+  reducer: (ctx: IContext<HiddenType>) => ReducerType
+): StoreContainer<StateType, ReducerType, HiddenType> {
+  const store = create<StateType>()(devtools((): StateType => state));
+  return { store, version, reducer };
 }

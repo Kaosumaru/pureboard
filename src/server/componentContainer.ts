@@ -8,9 +8,9 @@ import { createServerValidation } from './utils';
 import { GameOptions, StandardGameAction } from '../shared/standardActions';
 import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
 
-interface IGenericComponent<Data, Action, HiddenType> {
+interface IGenericComponent<StateType, ReducerType extends Reducer<StateType>, HiddenType> {
   afterActionApplied(ctx: GroupEmitter, action: Action | StandardGameAction): void;
-  container: StoreContainer<Data, Action, HiddenType>;
+  container: StoreContainer<StateType, ReducerType, HiddenType>;
   afterActionCallback?: (ctx: GroupEmitter, action: Action | StandardGameAction) => void;
 }
 
