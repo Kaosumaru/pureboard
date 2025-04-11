@@ -115,7 +115,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     const objs = gameData.hiddenObjects;
 
     const context: Context<HiddenObjectType> = {
-      playerValidation: createServerValidation(),
+      playerValidation: validation,
       random,
       objects: objs,
     };
