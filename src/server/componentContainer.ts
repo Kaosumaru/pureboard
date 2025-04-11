@@ -1,4 +1,4 @@
-import { CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
+import { Context, CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
 import { Component, ComponentConstructor, createCurrentPlayerValidation, createGameRoomAndJoin, getGameComponent } from './games';
@@ -41,7 +41,13 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
       const game = new GenericComponent<Data, ActionType, HiddenObjectType>(container);
 
       const hiddenObjects = this.hasHiddenState ? new HiddenObjectContainer<HiddenObjectType>() : undefined;
-      game.container.reducer(createServerValidation(), { type: 'newGame', options }, random, hiddenObjects);
+
+      const context: Context<HiddenObjectType> = {
+        playerValidation: createServerValidation(),
+        random,
+        objects: hiddenObjects,
+      };
+      game.container.reducer(context, { type: 'newGame', options });
 
       if (afterAction) {
         game.afterActionCallback = (ctx, action) => afterAction(container.store, id, ctx, action);
@@ -108,8 +114,14 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     const gameData = this.get(gameId);
     const objs = gameData.hiddenObjects;
 
+    const context: Context<HiddenObjectType> = {
+      playerValidation: createServerValidation(),
+      random,
+      objects: objs,
+    };
+
     try {
-      gameData.game.container.reducer(validation, action, random, objs);
+      gameData.game.container.reducer(context, action);
     } catch (e) {
       objs?.revertDelta();
       throw e;

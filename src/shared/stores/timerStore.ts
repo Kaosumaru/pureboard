@@ -1,8 +1,6 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
-import type {} from '@redux-devtools/extension'; // required for devtools typing
-import { CurrentPlayerValidation, RandomGenerator, StoreContainer } from '../interface';
+import { Context, CurrentPlayerValidation, StoreContainer } from '../interface';
 import { StandardGameAction } from '../standardActions';
+import { createComponentStore } from '../store';
 
 export interface SetActivePlayerAction {
   type: 'setActivePlayer';
@@ -52,20 +50,15 @@ export function timeLeftForPlayer(data: StoreData, player: number): number {
 }
 
 export function createGameStateStore(maxTimeInSeconds: number, players: number, perActivationTimeIncrement = 0): StoreContainer<StoreData, Action> {
-  const store = create<StoreData>()(
-    devtools(
-      (): StoreData => ({
-        activePlayer: undefined,
-        maxTime: maxTimeInSeconds * 1000,
-        perActivationTimeIncrement,
-        players: createPlayers(players),
-      })
-    )
+  return createComponentStore(
+    {
+      activePlayer: undefined,
+      maxTime: maxTimeInSeconds * 1000,
+      perActivationTimeIncrement,
+      players: createPlayers(players),
+    },
+    makeAction
   );
-  return {
-    store,
-    reducer: (playerValidation: CurrentPlayerValidation, action: Action | StandardGameAction, _: RandomGenerator) => store.setState(store => makeAction(playerValidation, store, action)),
-  };
 }
 
 function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreData, player: number | undefined): StoreData {
@@ -93,10 +86,10 @@ function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreD
   };
 }
 
-function makeAction(playerValidation: CurrentPlayerValidation, store: StoreData, action: Action | StandardGameAction): StoreData | Partial<StoreData> {
+function makeAction(ctx: Context, store: StoreData, action: Action | StandardGameAction): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'setActivePlayer':
-      return setActivePlayer(playerValidation, store, action.player);
+      return setActivePlayer(ctx.playerValidation, store, action.player);
     case 'restart':
       return { ...store, activePlayer: undefined, players: createPlayers(store.players.length) };
     case 'newGame':

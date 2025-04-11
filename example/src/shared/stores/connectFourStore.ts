@@ -1,8 +1,7 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension'; // required for devtools typing
-import { CurrentPlayerValidation, RandomGenerator, StoreContainer } from 'pureboard/shared/interface';
+import { Context, CurrentPlayerValidation, StoreContainer } from 'pureboard/shared/interface';
 import { StandardGameAction } from 'pureboard/shared/standardActions';
+import { createComponentStore } from 'pureboard/shared/store';
 
 export enum FieldType {
   Empty,
@@ -87,45 +86,34 @@ function makeMove(playerValidation: CurrentPlayerValidation, data: StoreData, co
   throw new Error('Column is full');
 }
 
-export function createGameStateStore(): StoreContainer<StoreData, Action | StandardGameAction> {
-  const useGameStateStore = create<StoreData>()(
-    devtools(
-      (): StoreData => ({
-        board: [],
-        currentPlayer: 0,
-        lastMoveRow: -1,
-        lastMoveColumn: -1,
-        victoriousPlayer: -1,
-      })
-    )
+export function createGameStateStore(): StoreContainer<StoreData, Action> {
+  return createComponentStore(
+    {
+      board: [],
+      currentPlayer: 0,
+      lastMoveRow: -1,
+      lastMoveColumn: -1,
+      victoriousPlayer: -1,
+    },
+    makeAction
   );
-
-  return {
-    store: useGameStateStore,
-    reducer: (
-      playerValidation: CurrentPlayerValidation,
-      action: Action | StandardGameAction,
-      random: RandomGenerator
-    ) => useGameStateStore.setState(store => makeAction(playerValidation, store, action, random)),
-  };
 }
 
 function makeAction(
-  playerValidation: CurrentPlayerValidation,
+  ctx: Context,
   store: StoreData,
-  action: Action | StandardGameAction,
-  random: RandomGenerator
+  action: Action | StandardGameAction
 ): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'move':
-      return makeMove(playerValidation, store, action.column);
+      return makeMove(ctx.playerValidation, store, action.column);
     case 'surrender':
-      if (!playerValidation.canMoveAsPlayer(action.player)) throw new Error('Not your player');
+      if (!ctx.playerValidation.canMoveAsPlayer(action.player)) throw new Error('Not your player');
       return { ...store, victoriousPlayer: 1 - action.player };
     case 'newGame': {
       const newStore: StoreData = {
         board: create2DArray<FieldType>(6, 7, FieldType.Empty),
-        currentPlayer: random.int(2),
+        currentPlayer: ctx.random.int(2),
         lastMoveRow: -1,
         lastMoveColumn: -1,
         victoriousPlayer: -1,

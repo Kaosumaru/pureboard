@@ -1,4 +1,4 @@
-import { CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
+import { Context, CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
 import { ClientRandomGenerator } from './clientRandom';
 import { BaseClient } from './baseClient';
@@ -47,8 +47,13 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
       }
 
       this.random.setSeed(seed !== null ? seed : undefined);
+      const context: Context<HiddenType> = {
+        playerValidation: validation,
+        random: this.random,
+        objects: getClientHiddenObjects(hiddenInfo),
+      };
       try {
-        this.container.reducer(validation, action, this.random, getClientHiddenObjects(hiddenInfo));
+        this.container.reducer(context, action);
       } catch (err) {
         console.error(`While trying to apply action, from server:\n ${String(err)}`);
         throw err;

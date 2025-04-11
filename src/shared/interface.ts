@@ -115,6 +115,12 @@ export interface IHiddenObjects<T> {
   clearObjects(): void;
 }
 
+export interface Context<HiddenType = any> {
+  playerValidation: CurrentPlayerValidation;
+  random: RandomGenerator;
+  objects?: IHiddenObjects<HiddenType>;
+}
+
 /**
  * Represents a container for managing a store and handling actions within a game or application.
  *
@@ -133,5 +139,5 @@ export interface IHiddenObjects<T> {
  */
 export interface StoreContainer<StateType, ActionType, HiddenType = any> {
   store: Store<StateType>;
-  reducer: (playerValidation: CurrentPlayerValidation, action: ActionType | StandardGameAction, random: RandomGenerator, objects?: IHiddenObjects<HiddenType>) => void;
+  reducer: (ctx: Context<HiddenType>, action: ActionType | StandardGameAction) => void;
 }

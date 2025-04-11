@@ -1,8 +1,7 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
 import type {} from '@redux-devtools/extension'; // required for devtools typing
-import { CurrentPlayerValidation, RandomGenerator, StoreContainer } from '../interface';
+import { Context, StoreContainer } from '../interface';
 import { StandardGameAction } from '../standardActions';
+import { createComponentStore } from '../store';
 
 export interface UserInfo {
   id: string;
@@ -26,24 +25,19 @@ export interface StoreData {
 }
 
 export function createGameStateStore(): StoreContainer<StoreData, Action> {
-  const store = create<StoreData>()(
-    devtools(
-      (): StoreData => ({
-        messages: [],
-      })
-    )
+  return createComponentStore(
+    {
+      messages: [],
+    },
+    makeAction
   );
-  return {
-    store,
-    reducer: (playerValidation: CurrentPlayerValidation, action: Action | StandardGameAction, _: RandomGenerator) => store.setState(store => makeAction(playerValidation, store, action)),
-  };
 }
 
-function makeAction(playerValidation: CurrentPlayerValidation, store: StoreData, action: Action | StandardGameAction): StoreData | Partial<StoreData> {
+function makeAction(ctx: Context, store: StoreData, action: Action | StandardGameAction): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'message': {
       const { id, name } = action.message.user;
-      if (!playerValidation.isUser(id, name)) throw new Error('Not allowed to send message');
+      if (!ctx.playerValidation.isUser(id, name)) throw new Error('Not allowed to send message');
       return { messages: [...store.messages, action.message] };
     }
     case 'newGame':

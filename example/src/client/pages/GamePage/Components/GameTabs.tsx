@@ -5,9 +5,10 @@ import CasinoIcon from '@mui/icons-material/Casino';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { JSX, useState } from 'react';
 import { ChatClient } from 'pureboard/client/clients/chatClient';
-import { IBaseComponentClient, useClient } from 'pureboard/client/baseComponentClient';
 import { SnackBarChat } from './SnackBarChat';
 import GameChat from './GameChat';
+import { useClient } from 'pureboard/client/react';
+import { IBaseComponentClient } from 'pureboard/client/interface';
 
 export interface GameTabsProps {
   gameClient: IBaseComponentClient;
