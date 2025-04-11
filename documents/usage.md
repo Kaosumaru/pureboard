@@ -24,32 +24,23 @@ export interface StoreData {
 
 
 export function createGameStateStore(): StoreContainer<StoreData, Action | StandardGameAction> {
-  const useGameStateStore = create<StoreData>()(
-    devtools(
-      (): StoreData => ({
-        yourGameProperty: "",
-        ... // initial state data
-      })
-    )
+  return createComponentStore(
+    {
+      ... // initial store state
+    },
+    reducer
   );
-
-  return {
-    store: useGameStateStore,
-    reducer: (playerValidation: CurrentPlayerValidation, action: Action | StandardGameAction, random: RandomGenerator) =>
-      useGameStateStore.setState(store => reducer(playerValidation, store, action, random)),
-  };
 }
 
 function reducer(
-  playerValidation: CurrentPlayerValidation,
+  ctx: Context,
   store: StoreData,
   action: Action | StandardGameAction,
-  random: RandomGenerator
 ): StoreData | Partial<StoreData> {
    /*
    * Return new game state after applying an action
    * Bear in mind that this function should be pure - always give same result for an Action
-   * Randomness can be achieved by RandomGenerator
+   * Randomness can be achieved by ctx.random
    */
    ...
 }

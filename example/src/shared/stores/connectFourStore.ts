@@ -1,4 +1,3 @@
-import type {} from '@redux-devtools/extension'; // required for devtools typing
 import { Context, CurrentPlayerValidation, StoreContainer } from 'pureboard/shared/interface';
 import { StandardGameAction } from 'pureboard/shared/standardActions';
 import { createComponentStore } from 'pureboard/shared/store';
