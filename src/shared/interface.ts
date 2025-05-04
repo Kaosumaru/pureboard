@@ -50,8 +50,8 @@ export interface RandomGenerator {
    * Generates a random integer between the specified minimum (inclusive) and maximum (exclusive) values.
    *
    * @param min - The lower bound (inclusive) for the random integer.
-   * @param max - The upper bound (exclusive) for the random integer.
-   * @returns A random integer between `min` (inclusive) and `max` (exclusive).
+   * @param max - The upper bound (inclusive) for the random integer.
+   * @returns A random integer between `min` (inclusive) and `max` (inclusive).
    */
   intBetween(min: number, max: number): number;
 }
