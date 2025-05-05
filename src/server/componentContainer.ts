@@ -43,6 +43,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
       const hiddenObjects = this.hasHiddenState ? new HiddenObjectContainer<HiddenObjectType>() : undefined;
 
       random.reset();
+
       const context: Context<HiddenObjectType> = {
         playerValidation: createServerValidation(),
         random,
@@ -122,6 +123,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     };
 
     random.reset();
+
     try {
       gameData.game.container.reducer(context, action);
     } catch (e) {
