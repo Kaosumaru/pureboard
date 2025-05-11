@@ -6,13 +6,21 @@ describe('random server/client', () => {
     const server = new ServerRandomGenerator();
     const client = new ClientRandomGenerator();
 
-    server.regenerateSeed();
-    client.setSeed(server.seed());
+    server.reset();
+
     const tries = 10;
 
+    const serverValues1 = [];
+    const serverValues2 = [];
     for (let i = 0; i < tries; i++) {
-      expect(server.int(10)).toEqual(client.int(10));
-      expect(server.intBetween(1, 10)).toEqual(client.intBetween(1, 10));
+      serverValues1.push(server.int(10));
+      serverValues2.push(server.intBetween(1, 10));
+    }
+
+    client.setRandomValues(server.randomValues());
+    for (let i = 0; i < tries; i++) {
+      expect(serverValues1[i]).toEqual(client.int(10));
+      expect(serverValues2[i]).toEqual(client.intBetween(1, 10));
     }
   });
 });
