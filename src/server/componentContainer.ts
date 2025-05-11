@@ -131,7 +131,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
       throw e;
     }
 
-    const randomValues = random.randomValues();
+    const seed = random.seed();
 
     if (objs) {
       ctx.iterateGroup(groupOf(gameId), ctx => {
@@ -140,11 +140,11 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
           delta: objs.getStateDelta(validation),
           responses: objs.responses(),
         };
-        ctx.emit(this.type + '/onAction', gameId, action, randomValues, info);
+        ctx.emit(this.type + '/onAction', gameId, action, seed, info);
       });
       objs.flushDelta();
     } else {
-      ctx.emitToGroup(groupOf(gameId), this.type + '/onAction', gameId, action, randomValues);
+      ctx.emitToGroup(groupOf(gameId), this.type + '/onAction', gameId, action, seed);
     }
 
     gameData.game.afterActionApplied(ctx, action);

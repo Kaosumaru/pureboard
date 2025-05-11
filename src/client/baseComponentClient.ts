@@ -39,14 +39,14 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     this.deinitialized = false;
     const validation = createDummyValidation();
 
-    this.onEvent(`${this.type}/onAction`, (gameId: number, action: Action | StandardGameAction, randomValues: number[], hiddenInfo?: ActionHiddenObjectInfo<HiddenType>) => {
+    this.onEvent(`${this.type}/onAction`, (gameId: number, action: Action | StandardGameAction, seed: number | null, hiddenInfo?: ActionHiddenObjectInfo<HiddenType>) => {
       if (!this.hasState) return;
       if (this.gameId !== gameId) return;
       if (hiddenInfo !== undefined) {
         this.hiddenState().setStateDelta(hiddenInfo.delta);
       }
 
-      this.random.setRandomValues(randomValues);
+      this.random.setSeed(seed !== null ? seed : undefined);
       const context: Context<HiddenType> = {
         playerValidation: validation,
         random: this.random,
@@ -58,7 +58,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
         console.error(`While trying to apply action, from server:\n ${String(err)}`);
         throw err;
       }
-      this.random.finalize();
+      this.random.setSeed(undefined);
 
       this.onAction(action);
       this.onAfterAction.emit(action);
