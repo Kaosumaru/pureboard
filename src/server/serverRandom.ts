@@ -1,35 +1,40 @@
 import { RandomGenerator } from '../shared/interface';
-import { create, RandomSeed } from 'random-seed';
 
 export class ServerRandomGenerator implements RandomGenerator {
   int(max: number): number {
-    if (!this.randomSeed) {
-      this.regenerateSeed();
-    }
-    return this.randomSeed?.range(max) ?? 0;
+    return this.intBetween(0, max - 1);
   }
 
   intBetween(min: number, max: number): number {
-    if (!this.randomSeed) {
-      this.regenerateSeed();
-    }
-    return this.randomSeed?.intBetween(min, max) ?? 0;
+    const value = getRandomInt(min, max);
+    this.addValue(value);
+    return value;
   }
 
-  seed(): number | undefined {
-    return this.currentSeed;
-  }
-
-  regenerateSeed(): void {
-    this.currentSeed = Math.random();
-    this.randomSeed = create(this.currentSeed.toString());
+  randomValues(): number[] {
+    return this.generatedNumbers;
   }
 
   reset(): void {
-    this.currentSeed = undefined;
-    this.randomSeed = undefined;
+    this.generatedNumbers = [];
   }
 
-  private currentSeed: number | undefined;
-  private randomSeed: RandomSeed | undefined;
+  private addValue(value: number): void {
+    this.generatedNumbers.push(value);
+  }
+
+  private generatedNumbers: number[] = [];
+}
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive).
+ * The value is no lower than min (or the next integer greater than min
+ * if min isn't an integer) and no greater than max (or the next integer
+ * lower than max if max isn't an integer).
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

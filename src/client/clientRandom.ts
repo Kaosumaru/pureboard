@@ -1,24 +1,30 @@
 import { RandomGenerator } from '../shared/interface';
-import { create, RandomSeed } from 'random-seed';
 
 export class ClientRandomGenerator implements RandomGenerator {
-  int(max: number): number {
-    if (!this.randomSeed) {
-      throw new Error('Random seed not initialized');
+  setRandomValues(randomValues: number[]): void {
+    this.generatedNumbers = randomValues;
+  }
+  int(_max: number): number {
+    return this.getNextRandom();
+  }
+
+  intBetween(_min: number, _max: number): number {
+    return this.getNextRandom();
+  }
+
+  finalize(): void {
+    if (this.generatedNumbers.length !== 0) {
+      console.error('Not all random numbers were used!');
     }
-    return this.randomSeed.range(max);
   }
 
-  intBetween(min: number, max: number): number {
-    if (!this.randomSeed) {
-      throw new Error('Random seed not initialized');
+  private getNextRandom(): number {
+    const value = this.generatedNumbers.shift();
+    if (value === undefined) {
+      throw new Error('No more random numbers available');
     }
-    return this.randomSeed.intBetween(min, max);
+    return value;
   }
 
-  setSeed(seed: number | undefined): void {
-    this.randomSeed = seed ? create(seed.toString()) : undefined;
-  }
-
-  private randomSeed: RandomSeed | undefined;
+  private generatedNumbers: number[] = [];
 }
