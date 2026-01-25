@@ -161,13 +161,14 @@ export function registerGame<Data, ActionType extends IAction, HiddenObjectType 
   storeConstructor: () => StoreContainer<Data, ActionType, HiddenObjectType>,
   settings: ICreationSettings<Data, ActionType>
 ): void {
-  const gameContainer = new ComponentContainer<Data, ActionType, HiddenObjectType>(type);
+  const gameContainer = new ComponentContainer<Data, ActionType, HiddenObjectType>(type, settings.hasHiddenState ?? false);
   gameContainer.registerServerWithCreation(server, storeConstructor, settings);
 }
 export interface ICreationSettings<StateType, ActionType> {
   components?: ComponentConstructor[];
   afterAction?: AfterActionType<StateType, ActionType>;
   timeout?: number;
+  hasHiddenState?: boolean;
 }
 
 class GenericComponent<Data, Action, HiddenType> implements IGenericComponent<Data, Action, HiddenType> {
