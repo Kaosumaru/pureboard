@@ -80,11 +80,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
   registerServerWithCreation(server: IServer, storeConstructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
     this.registerServer(server);
     server.RegisterFunction(this.type + '/createGame', (ctx, options: GameOptions) => {
-      let components: ComponentConstructor[] = [this.createComponent(storeConstructor(), options, settings.afterAction)];
-      if (settings.components) {
-        components = components.concat(settings.components);
-      }
-
+      const components: ComponentConstructor[] = [this.createComponent(storeConstructor(), options, settings.afterAction), ...(settings.components ?? [])];
       return createGameRoomAndJoin(ctx, options, this.type, components, settings.timeout ?? emptyRoomLifetime);
     });
   }
