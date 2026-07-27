@@ -1,5 +1,5 @@
 import { StoreData, Action, UserInfo, createGameStateStore } from '../../shared/stores/chatStore';
-import { ComponentContainer } from '../componentContainer';
+import { ComponentHandler } from '../components';
 import { ComponentConstructor } from '../rooms';
 import { IServer } from '../interface';
 
@@ -7,7 +7,7 @@ type ActionType = Action;
 
 export type ChatMessageCallback = (id: number, user: UserInfo, message: string) => void;
 
-const chatsContainer = new ComponentContainer<StoreData, ActionType>('chat');
+const chatsContainer = new ComponentHandler<StoreData, ActionType>('chat');
 
 export function createChat(): ComponentConstructor {
   return chatsContainer.createComponent(createGameStateStore(), { players: 0 });
@@ -22,5 +22,5 @@ export function createChatWithCallback(callback?: ChatMessageCallback): Componen
 }
 
 export function registerChat(server: IServer): void {
-  chatsContainer.registerGame(server);
+  chatsContainer.register(server);
 }

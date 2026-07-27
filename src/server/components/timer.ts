@@ -1,5 +1,5 @@
 import { StoreData, Action, createGameStateStore, timeLeftForPlayer } from '../../shared/stores/timerStore';
-import { ComponentContainer } from '../componentContainer';
+import { ComponentHandler } from '../components';
 import { Store } from '../../shared/interface';
 import { GroupEmitter, IServer } from '../interface';
 import { ComponentConstructor } from '../rooms';
@@ -9,7 +9,7 @@ type ActionType = Action;
 
 type TimerCallback = (gameId: number, player: number) => void;
 
-const timersContainer = new ComponentContainer<StoreData, ActionType>('timer');
+const timersContainer = new ComponentHandler<StoreData, ActionType>('timer');
 
 export function applyActionOnTimer(ctx: GroupEmitter, id: number, action: ActionType): void {
   timersContainer.sendServerAction(ctx, id, action);
@@ -36,5 +36,5 @@ export function createTimer(cb: TimerCallback, maxTime: number, players: number,
 }
 
 export function registerTimer(server: IServer): void {
-  timersContainer.registerGame(server);
+  timersContainer.register(server);
 }
