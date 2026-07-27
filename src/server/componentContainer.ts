@@ -76,15 +76,15 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     this.applyAction(ctx, gameId, action, validation);
   }
 
-  registerServerWithCreation(server: IServer, storeConstructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
-    this.registerServer(server);
+  registerGameWithCreation(server: IServer, storeConstructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
+    this.registerGame(server);
     server.RegisterFunction(this.type + '/createGame', (ctx, options: GameOptions) => {
       const components: ComponentConstructor[] = [this.createComponent(storeConstructor(), options, settings.afterAction), ...(settings.components ?? [])];
       return createRoomAndJoin(ctx, options, this.type, components, settings.timeout ?? emptyRoomLifetime);
     });
   }
 
-  registerServer(server: IServer): void {
+  registerGame(server: IServer): void {
     const validationFunction = overridenComponentContainerValidation ?? createUserPermissions;
     server.RegisterFunction(this.type + '/action', (ctx, gameId: number, action: ActionType | StandardGameAction) => {
       const validation = validationFunction(ctx, gameId);
@@ -101,12 +101,12 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     });
   }
 
-  protected beforeActionAplied(_ctx: GroupEmitter, _gameId: number, _action: ActionType | StandardGameAction, _validation: UserPermissions): void {
+  protected beforeActionApplied(_ctx: GroupEmitter, _gameId: number, _action: ActionType | StandardGameAction, _validation: UserPermissions): void {
     // This is a hook for subclasses to implement
   }
 
   private applyAction(ctx: GroupEmitter, gameId: number, action: ActionType | StandardGameAction, validation: UserPermissions) {
-    this.beforeActionAplied(ctx, gameId, action, validation);
+    this.beforeActionApplied(ctx, gameId, action, validation);
 
     const gameData = this.get(gameId);
     const objs = gameData.hiddenObjects;
@@ -157,7 +157,7 @@ export function registerGame<Data, ActionType extends IAction, HiddenObjectType 
   settings: ICreationSettings<Data, ActionType>
 ): void {
   const gameContainer = new ComponentContainer<Data, ActionType, HiddenObjectType>(type, settings.hasHiddenState ?? false);
-  gameContainer.registerServerWithCreation(server, storeConstructor, settings);
+  gameContainer.registerGameWithCreation(server, storeConstructor, settings);
 }
 export interface ICreationSettings<StateType, ActionType> {
   components?: ComponentConstructor[];

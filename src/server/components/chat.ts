@@ -22,5 +22,5 @@ export function createChatWithCallback(callback?: ChatMessageCallback): Componen
 }
 
 export function registerChat(server: IServer): void {
-  chatsContainer.registerServer(server);
+  chatsContainer.registerGame(server);
 }

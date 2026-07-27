@@ -36,5 +36,5 @@ export function createTimer(cb: TimerCallback, maxTime: number, players: number,
 }
 
 export function registerTimer(server: IServer): void {
-  timersContainer.registerServer(server);
+  timersContainer.registerGame(server);
 }

@@ -197,7 +197,7 @@ export function registerRooms(server: IServer): void {
   /**
    * Schedules room deletion when the group becomes empty. (so we don't have players actively connected to the room)
    */
-  const createTimeoutDelete = (roomId: number, group: string, timeout?: number) => {
+  const scheduleRoomDeletionWhenEmpty = (roomId: number, group: string, timeout?: number) => {
     // delete the room if it's empty for emptyRoomLifetime
     // TODO verify this in unit tests, check if we aren't installing multiple listeners
     if (timeout === undefined) return;
@@ -226,7 +226,7 @@ export function registerRooms(server: IServer): void {
     const group = roomToGroup(room);
     ctx.emitToGroup(group, 'room/tookSeat', roomId, userInfo, seat);
 
-    createTimeoutDelete(roomId, group, room.timeoutToClose);
+    scheduleRoomDeletionWhenEmpty(roomId, group, room.timeoutToClose);
   });
 
   server.RegisterFunction('room/leaveSeat', (ctx, roomId: number, seat: number) => {
@@ -251,7 +251,7 @@ export function registerRooms(server: IServer): void {
     const group = roomToGroup(room);
     ctx.emitToGroup(group, 'room/tookSeat', roomId, userInfo, seat);
 
-    createTimeoutDelete(roomId, group, room.timeoutToClose);
+    scheduleRoomDeletionWhenEmpty(roomId, group, room.timeoutToClose);
     return seat;
   });
 

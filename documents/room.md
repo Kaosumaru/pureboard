@@ -45,7 +45,7 @@ const players = 2;
 const time = 10 * 60;
 const increment = 5;
 
-gameContainer.registerServerWithCreation(server, createGameStateStore, {
+gameContainer.registerGameWithCreation(server, createGameStateStore, {
     afterAction,
     components: [
         createChat(),
