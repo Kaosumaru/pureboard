@@ -41,22 +41,22 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
     super(new RPCClient(url));
     this.store = createGameRoomStore();
 
-    this.onEvent('game/tookSeat', (roomId: number, userId: UserInfo, seat: number) => {
+    this.onEvent('room/tookSeat', (roomId: number, userId: UserInfo, seat: number) => {
       if (this.gameId !== roomId) return;
       this.state().tookSeat(userId, seat);
     });
 
-    this.onEvent('game/leftSeat', (roomId: number, seat: number) => {
+    this.onEvent('room/leftSeat', (roomId: number, seat: number) => {
       if (this.gameId !== roomId) return;
       this.state().leftSeat(seat);
     });
 
-    this.onEvent('game/sendSeatsState', (roomId: number, stateData: GameRoomData) => {
+    this.onEvent('room/sendSeatsState', (roomId: number, stateData: GameRoomData) => {
       if (this.gameId !== roomId) return;
       this.state().setState(stateData);
     });
 
-    this.onEvent('game/closed', (roomId: number) => {
+    this.onEvent('room/closed', (roomId: number) => {
       if (this.gameId !== roomId) return;
       this.state().close();
     });
@@ -146,7 +146,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
    * @returns A promise that resolves to the game room ID.
    */
   public async join(gameId: number, password?: string): Promise<number> {
-    await this.client.call<number>('game/join', gameId, password);
+    await this.client.call<number>('room/join', gameId, password);
     this.gameId = gameId;
     this.gamePassword = password;
 
@@ -161,7 +161,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
    * @param seat - The index of the seat to take.
    */
   public async takeSeat(seat: number): Promise<void> {
-    await this.client.call('game/takeSeat', this.gameId, seat);
+    await this.client.call('room/takeSeat', this.gameId, seat);
   }
 
   /**
@@ -169,7 +169,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
    * @param seat - The index of the seat to leave.
    */
   public async leaveSeat(seat: number): Promise<void> {
-    await this.client.call('game/leaveSeat', this.gameId, seat);
+    await this.client.call('room/leaveSeat', this.gameId, seat);
   }
 
   /**
@@ -177,14 +177,14 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
    * @returns A promise that resolves to the index of the seat taken.
    */
   public async takeAvailableSeat(): Promise<number> {
-    return await this.client.call<number>('game/takeAvailableSeat', this.gameId);
+    return await this.client.call<number>('room/takeAvailableSeat', this.gameId);
   }
 
   /**
    * Closes the current game room.
    */
   public async close(): Promise<void> {
-    await this.client.call('game/close', this.gameId);
+    await this.client.call('room/close', this.gameId);
   }
 
   /**
@@ -192,7 +192,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
    * @returns A promise that resolves to the game room state data.
    */
   public async getState(): Promise<GameRoomData> {
-    return await this.client.call<GameRoomData>('game/getSeatsState', this.gameId);
+    return await this.client.call<GameRoomData>('room/getSeatsState', this.gameId);
   }
 
   /**

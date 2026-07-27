@@ -1,4 +1,4 @@
-import { Context, CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
+import { Context, UserPermissions, Store, StoreContainer } from '../shared/interface';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
 import { ClientRandomGenerator } from './clientRandom';
 import { BaseClient } from './baseClient';
@@ -8,7 +8,7 @@ import { GameOptions, StandardGameAction } from '../shared/standardActions';
 import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
 import { IBaseComponentClient, IDisposableClient, IGameRoomClient } from './interface';
 
-function createDummyValidation(): CurrentPlayerValidation {
+function createDummyValidation(): UserPermissions {
   return {
     isUser: () => true,
     canMoveAsPlayer: () => true,

@@ -2,7 +2,7 @@ import { StoreData, Action, createGameStateStore, timeLeftForPlayer } from '../.
 import { ComponentContainer } from '../componentContainer';
 import { Store } from '../../shared/interface';
 import { GroupEmitter, IServer } from '../interface';
-import { ComponentConstructor } from '../games';
+import { ComponentConstructor } from '../rooms';
 import { StandardGameAction } from '../../shared/standardActions';
 
 type ActionType = Action;

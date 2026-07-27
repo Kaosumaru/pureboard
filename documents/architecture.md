@@ -7,12 +7,12 @@ Clients send `Action`, server validates them, applies to state, and sends to oth
 
 ## Game room instances
 
-`games.ts` is holding instances of game rooms with components.
+`rooms.ts` is holding instances of game rooms with components.
 Room instances have a timeout and are automatically deleted after no player is connected.
 
 ## RPC calls
 
-`registerGames` registers API for joining instance of game rooms and taking a seat in the game.
+`registerRooms` registers API for joining instance of game rooms and taking a seat in the game.
 Game instance is keeping array of seats and array of components (game is on of the components).
 
 `registerGame` in `ComponentContainer.ts` is registering RPC calls to create a game room for a specific game, get actual game state and apply actions.

@@ -1,6 +1,6 @@
 import { StoreData, Action, UserInfo, createGameStateStore } from '../../shared/stores/chatStore';
 import { ComponentContainer } from '../componentContainer';
-import { ComponentConstructor } from '../games';
+import { ComponentConstructor } from '../rooms';
 import { IServer } from '../interface';
 
 type ActionType = Action;

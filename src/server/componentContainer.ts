@@ -1,7 +1,7 @@
-import { Context, CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
+import { Context, UserPermissions, Store, StoreContainer } from '../shared/interface';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
-import { Component, ComponentConstructor, createCurrentPlayerValidation, createGameRoomAndJoin, getGameComponent } from './games';
+import { Component, ComponentConstructor, createUserPermissions, createRoomAndJoin, getRoomComponent, roomIdToGroup } from './rooms';
 import { GroupEmitter, IServer } from './interface';
 import { overridenComponentContainerValidation } from './test/server';
 import { createServerValidation } from './utils';
@@ -25,7 +25,6 @@ interface ComponentData<Data, ActionType extends IAction, HiddenObjectType = any
 
 const random = new ServerRandomGenerator();
 
-const groupOf = (id: number) => `game/${id}`;
 type AfterActionType<StateType, ActionType> = (store: Store<StateType>, id: number, ctx: GroupEmitter, action: ActionType | StandardGameAction) => void;
 
 export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectType = any> {
@@ -69,7 +68,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
   }
 
   protected get(id: number): ComponentData<Data, ActionType, HiddenObjectType> {
-    return getGameComponent<ComponentData<Data, ActionType, HiddenObjectType>>(id, this.type);
+    return getRoomComponent<ComponentData<Data, ActionType, HiddenObjectType>>(id, this.type);
   }
 
   sendServerAction(ctx: GroupEmitter, gameId: number, action: ActionType): void {
@@ -81,12 +80,12 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     this.registerServer(server);
     server.RegisterFunction(this.type + '/createGame', (ctx, options: GameOptions) => {
       const components: ComponentConstructor[] = [this.createComponent(storeConstructor(), options, settings.afterAction), ...(settings.components ?? [])];
-      return createGameRoomAndJoin(ctx, options, this.type, components, settings.timeout ?? emptyRoomLifetime);
+      return createRoomAndJoin(ctx, options, this.type, components, settings.timeout ?? emptyRoomLifetime);
     });
   }
 
   registerServer(server: IServer): void {
-    const validationFunction = overridenComponentContainerValidation ?? createCurrentPlayerValidation;
+    const validationFunction = overridenComponentContainerValidation ?? createUserPermissions;
     server.RegisterFunction(this.type + '/action', (ctx, gameId: number, action: ActionType | StandardGameAction) => {
       const validation = validationFunction(ctx, gameId);
       this.applyAction(ctx, gameId, action, validation);
@@ -102,11 +101,11 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     });
   }
 
-  protected beforeActionAplied(_ctx: GroupEmitter, _gameId: number, _action: ActionType | StandardGameAction, _validation: CurrentPlayerValidation): void {
+  protected beforeActionAplied(_ctx: GroupEmitter, _gameId: number, _action: ActionType | StandardGameAction, _validation: UserPermissions): void {
     // This is a hook for subclasses to implement
   }
 
-  private applyAction(ctx: GroupEmitter, gameId: number, action: ActionType | StandardGameAction, validation: CurrentPlayerValidation) {
+  private applyAction(ctx: GroupEmitter, gameId: number, action: ActionType | StandardGameAction, validation: UserPermissions) {
     this.beforeActionAplied(ctx, gameId, action, validation);
 
     const gameData = this.get(gameId);
@@ -130,8 +129,8 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
     const seed = random.seed();
 
     if (objs) {
-      ctx.iterateGroup(groupOf(gameId), ctx => {
-        const validation = createCurrentPlayerValidation(ctx, gameId);
+      ctx.iterateGroup(roomIdToGroup(gameId), ctx => {
+        const validation = createUserPermissions(ctx, gameId);
         const info: ActionHiddenObjectInfo<HiddenObjectType> = {
           delta: objs.getStateDelta(validation),
           responses: objs.responses(),
@@ -140,7 +139,7 @@ export class ComponentContainer<Data, ActionType extends IAction, HiddenObjectTy
       });
       objs.flushDelta();
     } else {
-      ctx.emitToGroup(groupOf(gameId), this.type + '/onAction', gameId, action, seed);
+      ctx.emitToGroup(roomIdToGroup(gameId), this.type + '/onAction', gameId, action, seed);
     }
 
     gameData.game.afterActionApplied(ctx, action);

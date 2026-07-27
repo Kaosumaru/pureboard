@@ -1,6 +1,6 @@
 import { ChatClient } from '../src/client/clients/chatClient';
 import { createChat, createChatWithCallback, registerChat } from '../src/server/components/chat';
-import { ComponentConstructor } from '../src/server/games';
+import { ComponentConstructor } from '../src/server/rooms';
 import { Message } from '../src/shared/stores/chatStore';
 import { componentTestHelper } from './componentTestHelper';
 

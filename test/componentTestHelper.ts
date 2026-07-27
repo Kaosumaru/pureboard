@@ -1,11 +1,11 @@
 import { TestServer } from './testServer';
-import { CurrentPlayerValidation } from '../src/shared/interface';
+import { UserPermissions } from '../src/shared/interface';
 import { overrideComponentContainerValidation } from '../src/server/test/server';
 import { Context } from 'yawr';
-import { closeGame, ComponentConstructor, createGameRoom } from '../src/server/games';
+import { deleteRoom, ComponentConstructor, createRoom } from '../src/server/rooms';
 import { IDisposableClient, IGameRoomClient } from '../src/client/interface';
 
-function createComponentValidation(ctx: Context, _gameId: number): CurrentPlayerValidation {
+function createComponentValidation(ctx: Context, _gameId: number): UserPermissions {
   const userId = ctx.userId ?? '';
   const userName = ctx.userName ?? '';
 
@@ -32,14 +32,14 @@ export async function componentTestHelper<ComponentClient extends IDisposableCli
     data.registerServerComponents(server);
   });
 
-  const game = createGameRoom({ players: 0 }, 'dummy', [data.componentConstructor]);
+  const game = createRoom({ players: 0 }, 'dummy', [data.componentConstructor]);
   const gameId = game.data.id;
-  server.addToGroup(client, `game/${gameId}`);
+  server.addToGroup(client, `room/${gameId}`);
 
   const componentClient = new data.clientType({ client, gameId });
   await componentClient.initialize();
 
   await testCallback(componentClient);
 
-  closeGame(gameId);
+  deleteRoom(server, gameId);
 }

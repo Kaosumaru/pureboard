@@ -5,7 +5,7 @@ import { StandardGameAction } from './standardActions';
  * Interface representing the validation logic for a player in a game.
  * This validation determines, if user is allowed to make a move for player in the game.
  */
-export interface CurrentPlayerValidation {
+export interface UserPermissions {
   /**
    * Determines if the user sending the action occupies the seat with given id.
    *
@@ -116,7 +116,7 @@ export interface IHiddenObjects<T> {
 }
 
 export interface Context<HiddenType = any> {
-  playerValidation: CurrentPlayerValidation;
+  playerValidation: UserPermissions;
   random: RandomGenerator;
   objects?: IHiddenObjects<HiddenType>;
 }

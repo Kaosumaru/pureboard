@@ -1,4 +1,4 @@
-import { Context, CurrentPlayerValidation, StoreContainer } from '../interface';
+import { Context, UserPermissions, StoreContainer } from '../interface';
 import { StandardGameAction } from '../standardActions';
 import { createComponentStore } from '../store';
 
@@ -61,7 +61,7 @@ export function createGameStateStore(maxTimeInSeconds: number, players: number, 
   );
 }
 
-function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreData, player: number | undefined, now: number): StoreData {
+function setActivePlayer(playerValidation: UserPermissions, data: StoreData, player: number | undefined, now: number): StoreData {
   if (!playerValidation.isServerOriginating()) throw new Error('Not server originating');
 
   const { players } = data;

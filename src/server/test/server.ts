@@ -1,7 +1,7 @@
 import { Context } from 'yawr';
-import { CurrentPlayerValidation } from '../../shared/interface';
+import { UserPermissions } from '../../shared/interface';
 
-type OverrideValidation = (ctx: Context, gameId: number) => CurrentPlayerValidation;
+type OverrideValidation = (ctx: Context, gameId: number) => UserPermissions;
 
 export let overridenComponentContainerValidation: OverrideValidation | undefined;
 
