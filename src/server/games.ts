@@ -10,11 +10,25 @@ export type Component = [string, never];
 type ComponentsMap = { [id: string]: never };
 
 interface GameRoom {
+  // Game room data including seats, type, and password.
+  // This data is sent to clients when they join a game room.
   data: GameRoomData;
+
+  // Tracks how many times each user has joined the room.
+  // Used to prevent users that not joined a game room from performing actions or getting game state.
   joinedPlayers: Map<string, number>;
+
+  // Components are stored in a map keyed by component type.
   components: ComponentsMap;
 }
 
+/**
+ * Builds a component map for a game room from constructor functions.
+ *
+ * @param id - Game room id passed to each constructor.
+ * @param arr - Component constructor list.
+ * @returns A map keyed by component type.
+ */
 function arrayToComponents(id: number, arr: ComponentConstructor[]): ComponentsMap {
   const result: ComponentsMap = {};
   for (const constructor of arr) {
@@ -27,6 +41,15 @@ function arrayToComponents(id: number, arr: ComponentConstructor[]): ComponentsM
 const games = new Map<number, GameRoom>();
 let lastId = 0;
 
+/**
+ * Creates a validation helper bound to the current user and game room.
+ * This is used to validate whether a user can perform actions as a specific player in the game.
+ * (a user can only move as a player if they have taken that seat in the game room).
+ *
+ * @param ctx - Request context.
+ * @param gameId - Target game id.
+ * @returns Validation callbacks used by game actions.
+ */
 export function createCurrentPlayerValidation(ctx: Context, gameId: number): CurrentPlayerValidation {
   const game = getGameRoomData(ctx, gameId);
   const userId = ctx.userId ?? '';
@@ -53,6 +76,15 @@ function userInfoFromContext(ctx: Context): UserInfo {
   return { id: ctx.userId ?? '', name: ctx.userName ?? '' };
 }
 
+/**
+ * Returns a component stored for a game room.
+ *
+ * @typeParam T - Expected component type.
+ * @param gameId - Game id.
+ * @param type - Component key.
+ * @returns The component value.
+ * @throws Error When the game or component does not exist.
+ */
 export function getGameComponent<T>(gameId: number, type: string): T {
   const game = games.get(gameId);
   if (!game) throw new Error('Game not found');
@@ -80,6 +112,16 @@ function joinGame(ctx: Context, gameId: number, password?: string): GameRoomData
   return game.data;
 }
 
+/**
+ * Creates a game room and joins the caller as the first connected member.
+ *
+ * @param ctx - Request context.
+ * @param options - Room options including player count.
+ * @param type - Game type identifier.
+ * @param components - Component constructors.
+ * @param timeout - Empty-room timeout in milliseconds.
+ * @returns Created game room data.
+ */
 export function createGameRoomAndJoin(ctx: Context, options: GameOptions, type: string, components: ComponentConstructor[], timeout: number): GameRoomData {
   const gameRoom = createGameRoom(options, type, components, timeout);
 
@@ -89,6 +131,12 @@ export function createGameRoomAndJoin(ctx: Context, options: GameOptions, type: 
   return gameRoom.data;
 }
 
+/**
+ * Closes and removes a game room from memory.
+ *
+ * @param gameId - Game id.
+ * @returns The removed game room, or undefined if it does not exist.
+ */
 export function closeGame(gameId: number): GameRoom | undefined {
   const game = games.get(gameId);
   if (!game) return undefined;
@@ -97,6 +145,16 @@ export function closeGame(gameId: number): GameRoom | undefined {
   return game;
 }
 
+/**
+ * Creates and stores a new game room instance.
+ * Will fill instance components by calling each constructor with the game id.
+ *
+ * @param options - Room options including player count.
+ * @param type - Game type identifier.
+ * @param components - Component constructors.
+ * @param timeout - Optional empty-room timeout in milliseconds.
+ * @returns The created game room with data and initialized components.
+ */
 export function createGameRoom(options: GameOptions, type: string, components: ComponentConstructor[], timeout?: number): GameRoom {
   lastId++;
   const id = lastId;
@@ -122,6 +180,11 @@ export function createGameRoom(options: GameOptions, type: string, components: C
   return game;
 }
 
+/**
+ * Registers game-related RPC handlers on the server.
+ *
+ * @param server - Server abstraction used to register handlers.
+ */
 export function registerGames(server: IServer): void {
   const deleteGame = (gameId: number) => {
     const game = closeGame(gameId);
@@ -129,8 +192,12 @@ export function registerGames(server: IServer): void {
     server.onGroupRemoved(groupOf(game.data), undefined);
   };
 
+  /**
+   * Schedules room deletion when the group becomes empty. (so we don't have players actively connected to the room)
+   */
   const createTimeoutDelete = (gameId: number, group: string, timeout?: number) => {
     // delete the room if it's empty for emptyRoomLifetime
+    // TODO verify this in unit tests, check if we aren't installing multiple listeners
     if (timeout === undefined) return;
     server.onGroupRemoved(group, () =>
       setTimeout(() => {
