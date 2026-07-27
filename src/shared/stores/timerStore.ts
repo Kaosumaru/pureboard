@@ -5,6 +5,7 @@ import { createComponentStore } from '../store';
 export interface SetActivePlayerAction {
   type: 'setActivePlayer';
   player: number | undefined;
+  currentTimestamp: number;
 }
 
 export interface RestartAction {
@@ -38,8 +39,7 @@ function createPlayers(players: number): PlayerTime[] {
   return playerTimes;
 }
 
-export function timeLeftForPlayer(data: StoreData, player: number): number {
-  const now = Date.now();
+export function timeLeftForPlayer(data: StoreData, player: number, now: number): number {
   const state = data.players[player];
   const elapsed = state.elapsedTime + (state.lastActivationTimestamp ? now - state.lastActivationTimestamp : 0);
 
@@ -61,13 +61,12 @@ export function createGameStateStore(maxTimeInSeconds: number, players: number, 
   );
 }
 
-function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreData, player: number | undefined): StoreData {
+function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreData, player: number | undefined, now: number): StoreData {
   if (!playerValidation.isServerOriginating()) throw new Error('Not server originating');
 
   const { players } = data;
 
   const newPlayers = [...players];
-  const now = Date.now();
   if (data.activePlayer !== undefined) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     newPlayers[data.activePlayer].elapsedTime += now - newPlayers[data.activePlayer].lastActivationTimestamp!;
@@ -89,7 +88,7 @@ function setActivePlayer(playerValidation: CurrentPlayerValidation, data: StoreD
 function makeAction(ctx: Context, store: StoreData, action: Action | StandardGameAction): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'setActivePlayer':
-      return setActivePlayer(ctx.playerValidation, store, action.player);
+      return setActivePlayer(ctx.playerValidation, store, action.player, action.currentTimestamp);
     case 'restart':
       return { ...store, activePlayer: undefined, players: createPlayers(store.players.length) };
     case 'newGame':

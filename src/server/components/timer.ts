@@ -23,7 +23,7 @@ export function createTimer(cb: TimerCallback, maxTime: number, players: number,
 
       if (action.player === undefined) return;
 
-      const timeLeft = timeLeftForPlayer(store.getState(), action.player);
+      const timeLeft = timeLeftForPlayer(store.getState(), action.player, Date.now());
       const player = action.player;
       timer = setTimeout(() => {
         cb(id, player);
