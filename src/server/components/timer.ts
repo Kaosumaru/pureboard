@@ -9,10 +9,10 @@ type ActionType = Action;
 
 type TimerCallback = (gameId: number, player: number) => void;
 
-const gameContainer = new ComponentContainer<StoreData, ActionType>('timer');
+const timersContainer = new ComponentContainer<StoreData, ActionType>('timer');
 
 export function applyActionOnTimer(ctx: GroupEmitter, id: number, action: ActionType): void {
-  gameContainer.sendServerAction(ctx, id, action);
+  timersContainer.sendServerAction(ctx, id, action);
 }
 
 export function createTimer(cb: TimerCallback, maxTime: number, players: number, perActivationTimeIncrement = 0): ComponentConstructor {
@@ -32,9 +32,9 @@ export function createTimer(cb: TimerCallback, maxTime: number, players: number,
   };
 
   const store = createGameStateStore(maxTime, players, perActivationTimeIncrement);
-  return gameContainer.createComponent(store, { players }, afterActionApplied);
+  return timersContainer.createComponent(store, { players }, afterActionApplied);
 }
 
 export function registerTimer(server: IServer): void {
-  gameContainer.registerServer(server);
+  timersContainer.registerServer(server);
 }

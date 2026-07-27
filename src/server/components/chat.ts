@@ -7,14 +7,14 @@ type ActionType = Action;
 
 export type ChatMessageCallback = (id: number, user: UserInfo, message: string) => void;
 
-const gameContainer = new ComponentContainer<StoreData, ActionType>('chat');
+const chatsContainer = new ComponentContainer<StoreData, ActionType>('chat');
 
 export function createChat(): ComponentConstructor {
-  return gameContainer.createComponent(createGameStateStore(), { players: 0 });
+  return chatsContainer.createComponent(createGameStateStore(), { players: 0 });
 }
 
 export function createChatWithCallback(callback?: ChatMessageCallback): ComponentConstructor {
-  return gameContainer.createComponent(createGameStateStore(), { players: 0 }, (_store, _id, _ctx, action) => {
+  return chatsContainer.createComponent(createGameStateStore(), { players: 0 }, (_store, _id, _ctx, action) => {
     if (action.type === 'message' && callback) {
       callback(_id, action.message.user, action.message.message);
     }
@@ -22,5 +22,5 @@ export function createChatWithCallback(callback?: ChatMessageCallback): Componen
 }
 
 export function registerChat(server: IServer): void {
-  gameContainer.registerServer(server);
+  chatsContainer.registerServer(server);
 }
