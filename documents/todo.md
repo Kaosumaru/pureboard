@@ -6,12 +6,16 @@
 
 ## Docs
 
-- fill exacmples with example of how to implement a simple game
+- fill examples with example of how to implement a simple game
 
 ## GameOptions & StandardGameAction
 
 This doesn't seem well defined right now.
-`GameOptions`
+Currently, we are expecting that every game can respond to `newGame` action, and `GameOptions` are provided when creating room to create seats.
+This creates weird dependencies:
+- room needs to create seats
+- technically action is sent to game component and an cause a mismatch with seats between game and room
+- this introduces a weird requirement for all components to handle "newGame" action
 
 ## Other
 
