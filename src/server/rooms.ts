@@ -16,7 +16,7 @@ interface GameRoom {
 
   // Tracks how many times each user has joined the room.
   // Used to prevent users that not joined a game room from performing actions or getting game state.
-  joinedPlayers: Map<string, number>;
+  joinedUsers: Map<string, number>;
 
   // Components are stored in a map keyed by component type.
   components: ComponentsMap;
@@ -104,7 +104,7 @@ export function getRoomComponent<T>(roomId: number, type: string): T {
 function getRoomData(ctx: Context, roomId: number): GameRoomData {
   if (ctx.userId === undefined) throw new Error('Not authorized');
   const room = getRoom(roomId);
-  if (!room.joinedPlayers.has(ctx.userId)) throw new Error('Not joined to this game');
+  if (!room.joinedUsers.has(ctx.userId)) throw new Error('Not joined to this game');
   return room.data;
 }
 
@@ -112,8 +112,8 @@ function joinRoom(ctx: Context, roomId: number, password?: string): GameRoomData
   if (ctx.userId === undefined) throw new Error('Not authorized');
   const room = getRoom(roomId);
   if (room.data.password && room.data.password !== password) throw new Error('Invalid password');
-  const prevValue = room.joinedPlayers.get(ctx.userId);
-  room.joinedPlayers.set(ctx.userId, (prevValue ?? 0) + 1);
+  const prevValue = room.joinedUsers.get(ctx.userId);
+  room.joinedUsers.set(ctx.userId, (prevValue ?? 0) + 1);
   ctx.addToGroup(roomToGroup(room.data));
   return room.data;
 }
@@ -131,7 +131,7 @@ function joinRoom(ctx: Context, roomId: number, password?: string): GameRoomData
 export function createRoomAndJoin(ctx: Context, options: GameOptions, type: string, components: ComponentConstructor[], timeout: number): GameRoomData {
   const room = createRoom(options, type, components, timeout);
 
-  room.joinedPlayers.set(ctx.userId ?? '', 1);
+  room.joinedUsers.set(ctx.userId ?? '', 1);
   ctx.addToGroup(roomToGroup(room.data));
 
   return room.data;
@@ -179,7 +179,7 @@ export function createRoom(options: GameOptions, type: string, components: Compo
 
   const room: GameRoom = {
     data,
-    joinedPlayers: new Map<string, number>(),
+    joinedUsers: new Map<string, number>(),
     components: buildComponentMap(id, components),
   };
 
