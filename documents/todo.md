@@ -17,6 +17,11 @@ This creates weird dependencies:
 - technically action is sent to game component and an cause a mismatch with seats between game and room
 - this introduces a weird requirement for all components to handle "newGame" action
 
+I think that proper action is to:
+- add "initialize/reset" RPC on the game room instance with number of seats
+- just readd there all components that are supposed to be reset (chat can be exception)
+
+
 ## Other
 
 - add a way to add a bot player (maybe a bot component would be a good pick? Then we could save type of bot assigned to each seat)
