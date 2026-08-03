@@ -101,11 +101,7 @@ export function createGameStateStore(): StoreContainer<StoreData, Action> {
   );
 }
 
-function makeAction(
-  ctx: Context,
-  store: StoreData,
-  action: Action
-): StoreData | Partial<StoreData> {
+function makeAction(ctx: Context, store: StoreData, action: Action): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'move':
       return makeMove(ctx.playerValidation, store, action.column);
@@ -113,6 +109,9 @@ function makeAction(
       if (!ctx.playerValidation.canMoveAsPlayer(action.player)) throw new Error('Not your player');
       return { ...store, victoriousPlayer: 1 - action.player };
     case 'newGame': {
+      if (store.victoriousPlayer === -1 && !ctx.playerValidation.isServerOriginating())
+        throw new Error('Game not over, cannot start a new game');
+
       const newStore: StoreData = {
         board: create2DArray<FieldType>(6, 7, FieldType.Empty),
         currentPlayer: ctx.random.int(2),

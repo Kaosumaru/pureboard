@@ -1,6 +1,5 @@
 import { Signal, SignalConnection } from 'typed-signals';
 import { UserInfo } from 'yawr';
-import { GameOptions } from '../shared/interface';
 
 export interface IClient {
   authorize(token: string): Promise<UserInfo | undefined>;
@@ -27,5 +26,4 @@ export interface IDisposableClient {
 
 export interface IBaseComponentClient {
   type: string;
-  restartGame(options: GameOptions): Promise<void>;
 }

@@ -1,4 +1,4 @@
-import { Context, UserPermissions, Store, StoreContainer, GameOptions } from '../shared/interface';
+import { Context, UserPermissions, Store, StoreContainer } from '../shared/interface';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
 import { ClientRandomGenerator } from './clientRandom';
 import { BaseClient } from './baseClient';
@@ -100,11 +100,6 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     this.container.store.setState(resp.state, true);
     this.hasState = true;
     return resp.state;
-  }
-
-  public async restartGame(_options: GameOptions): Promise<void> {
-    // override this per game
-    // await this.sendAction({ type: 'newGame', options });
   }
 
   protected onAction(_action: Action): void {

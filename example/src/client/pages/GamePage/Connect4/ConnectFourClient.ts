@@ -19,6 +19,6 @@ export class ConnectFourClient extends BaseGameClient<StoreData, Action> {
   }
 
   public async newGame() {
-    await this.restartGame({ players: 2 });
+    await this.sendAction({ type: 'newGame' });
   }
 }
