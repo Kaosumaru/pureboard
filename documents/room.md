@@ -2,75 +2,72 @@
 
 ## Overview
 
-Server can hosts multiple 'rooms' with different types of games.
+Server can host multiple rooms with different game types.
 These rooms can optionally have shared functionality (related or not to the actual game mechanics).
 
 Room usually has:
 - room id and password
-- information about game seats and players assigned to state
+- information about seats and assigned players
 - components:
     - main game component which holds state of the game
     - additional components (chat, timer, replay recorder, etc)
 
 ## Components
 
-Examples are:
+Common built-in components:
 - ingame chat
 - chess-like timer that causes player to lose if he doesn't have enough time
 
-These components work exactly like game state - players can send actions that can modify current state of a component.
+These components work exactly like game state: players can send actions that modify component state.
 (In fact, game state is also kept in a game component)
 
 ### Chat
 
-Chat is the simplest type of an additional component - it's not related to game mechanics, just a store of messages, 
-and players can append a new message by sending MessageAction.
+Chat is the simplest additional component. It is not related to game mechanics, just a store of messages,
+and players append new messages by sending `message` action.
 
-Note that when sending message action, you are also storing in the message your user name, and server is verifying that.
-This is needed, cause by architecture of `pureboard`, server is not modyfing client actions - only veryfies them.
+When sending message action, sender information is included in the payload and validated by server.
+This is needed because server does not modify client actions, it validates and applies them.
 
-Since you need information of "who is sending the message" to display it, client must implicitly include it in the action
-- and server is veryfing that it the message is corrent (server validates if username in the action matches sender)
+Since clients need "who sent the message", action includes user info,
+and server verifies that username/id in action matches authenticated sender.
 
 ### Timer
 
-Timer is a component that you can use if you want to add a chess-like timer to the game - if a player will go over time limit, he will lose the game. Timer logic is separate from the actual game logic - after active player changes, you need to apply `setActivePlayer` action on the timer so it's start to count time for that player.
+Timer is a component for chess-like clocks. If a player exceeds time limit, game can force a loss.
+Timer logic is separate from game reducer. After active player changes, apply `setActivePlayer` on timer.
 
-Current server implementation is server based - after server applies action to the game state, due to the hook it will apply action on the timer store.
+Current implementation is server-based: after game action is applied, hook applies timer action.
 
 To achieve that, `afterAction` hook is used:
 ```ts
+import { registerGame } from 'pureboard/server/components';
+import { createChat } from 'pureboard/server/components/chat';
+import { createTimer, applyActionOnTimer } from 'pureboard/server/components/timer';
 
 const players = 2;
-const time = 10 * 60;
-const increment = 5;
+const timeInSeconds = 10 * 60;
+const incrementInSeconds = 5;
 
-gameContainer.registerGameWithCreation(server, createGameStateStore, {
-    afterAction,
-    components: [
-        createChat(),
-        createTimer(
-        // this callback will be called when a player's time limit is up
-        (id, player) => { 
-            gameContainer.sendServerAction(server, id, {
-                type: 'surrender',
-                player,
-            });
-        },
-        time,
-        players,
-        increment,
-        ),
-    ],
+registerGame(server, 'connect4', createGameStateStore, {
+  afterAction,
+  components: [
+    createChat(),
+    createTimer(
+      // called when a player runs out of time
+      (id, player) => {
+        console.log(`Player ${player} timed out in game ${id}`);
+        // Trigger your own timeout handling here (for example: close room,
+        // persist match result, notify external service, etc.)
+      },
+      timeInSeconds,
+      players,
+      incrementInSeconds
+    ),
+  ],
 });
 
-
-function afterAction(
-  store: Store<StoreData>,
-  id: number,
-  ctx: GroupEmitter,
-  action: Action,
-): void {
+function afterAction(store: Store<StoreData>, id: number, ctx: GroupEmitter, action: Action): void {
   switch (action.type) {
     case 'move': {
       const player = store.getState().currentPlayer;
