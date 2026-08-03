@@ -69,7 +69,7 @@ function afterAction(
   store: Store<StoreData>,
   id: number,
   ctx: GroupEmitter,
-  action: Action | StandardGameAction,
+  action: Action,
 ): void {
   switch (action.type) {
     case 'move': {

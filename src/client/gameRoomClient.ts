@@ -1,8 +1,7 @@
 import { canUserMoveAsPlayer, createGameRoomStore, GameRoomData, GameRoomState, seatOf, UserInfo } from '../shared/gameRoomStore';
-import { Store } from '../shared/interface';
+import { GameOptions, Store } from '../shared/interface';
 import { RPCClient } from 'yawr';
 import { BaseClient } from './baseClient';
-import { GameOptions } from '../shared/standardActions';
 import { IGameRoomClient } from './interface';
 
 /**

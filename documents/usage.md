@@ -23,7 +23,7 @@ export interface StoreData {
 }
 
 
-export function createGameStateStore(): StoreContainer<StoreData, Action | StandardGameAction> {
+export function createGameStateStore(): StoreContainer<StoreData, Action> {
   return createComponentStore(
     {
       ... // initial store state
@@ -35,7 +35,7 @@ export function createGameStateStore(): StoreContainer<StoreData, Action | Stand
 function reducer(
   ctx: Context,
   store: StoreData,
-  action: Action | StandardGameAction,
+  action: Action,
 ): StoreData | Partial<StoreData> {
    /*
    * Return new game state after applying an action

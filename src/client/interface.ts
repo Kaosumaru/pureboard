@@ -1,6 +1,6 @@
 import { Signal, SignalConnection } from 'typed-signals';
 import { UserInfo } from 'yawr';
-import { GameOptions } from '../shared/standardActions';
+import { GameOptions } from '../shared/interface';
 
 export interface IClient {
   authorize(token: string): Promise<UserInfo | undefined>;

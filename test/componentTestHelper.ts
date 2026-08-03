@@ -32,7 +32,12 @@ export async function componentTestHelper<ComponentClient extends IDisposableCli
     data.registerServerComponents(server);
   });
 
-  const game = createRoom({ players: 0 }, 'dummy', [data.componentConstructor]);
+  const game = createRoom({
+    seats: 0,
+    typeId: 'test',
+    components: [data.componentConstructor],
+  });
+
   const gameId = game.data.id;
   server.addToGroup(client, `room/${gameId}`);
 

@@ -3,7 +3,6 @@ import { ComponentHandler } from '../components';
 import { Store } from '../../shared/interface';
 import { GroupEmitter, IServer } from '../interface';
 import { ComponentConstructor } from '../rooms';
-import { StandardGameAction } from '../../shared/standardActions';
 
 type ActionType = Action;
 
@@ -17,7 +16,7 @@ export function applyActionOnTimer(ctx: GroupEmitter, id: number, action: Action
 
 export function createTimer(cb: TimerCallback, maxTime: number, players: number, perActivationTimeIncrement = 0): ComponentConstructor {
   let timer: NodeJS.Timeout | undefined;
-  const afterActionApplied = (store: Store<StoreData>, id: number, ctx: GroupEmitter, action: Action | StandardGameAction) => {
+  const afterActionApplied = (store: Store<StoreData>, id: number, ctx: GroupEmitter, action: Action) => {
     if (action.type === 'setActivePlayer') {
       clearTimeout(timer);
 
@@ -32,7 +31,7 @@ export function createTimer(cb: TimerCallback, maxTime: number, players: number,
   };
 
   const store = createGameStateStore(maxTime, players, perActivationTimeIncrement);
-  return timersContainer.createComponent(store, { players }, afterActionApplied);
+  return timersContainer.createComponent(store, { afterAction: afterActionApplied });
 }
 
 export function registerTimer(server: IServer): void {

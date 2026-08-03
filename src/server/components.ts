@@ -1,17 +1,18 @@
-import { Context, UserPermissions, Store, StoreContainer } from '../shared/interface';
+import { Context, UserPermissions, Store, StoreContainer, GameOptions as RoomOptions } from '../shared/interface';
 import { HiddenObjectContainer } from './hiddenObjectsContainer';
 import { ServerRandomGenerator } from './serverRandom';
 import { Component, ComponentConstructor, createUserPermissions, createRoomAndJoin, getRoomComponent, roomIdToGroup } from './rooms';
 import { GroupEmitter, IServer } from './interface';
 import { overridenComponentContainerValidation } from './test/server';
 import { createServerValidation } from './utils';
-import { GameOptions, StandardGameAction } from '../shared/standardActions';
 import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
 
 interface IGenericComponent<Data, Action, HiddenType> {
-  afterActionApplied(ctx: GroupEmitter, action: Action | StandardGameAction): void;
+  afterActionApplied(ctx: GroupEmitter, action: Action, validation: UserPermissions): void;
+  beforeActionApplied(ctx: GroupEmitter, action: Action, validation: UserPermissions): void;
   container: StoreContainer<Data, Action, HiddenType>;
-  afterActionCallback?: (ctx: GroupEmitter, action: Action | StandardGameAction) => void;
+  afterActionCallback?: (ctx: GroupEmitter, action: Action, validation: UserPermissions) => void;
+  beforeActionCallback?: (ctx: GroupEmitter, action: Action, validation: UserPermissions) => void;
 }
 
 export interface IAction {
@@ -25,7 +26,7 @@ interface ComponentData<Data, ActionType extends IAction, HiddenObjectType = any
 
 const random = new ServerRandomGenerator();
 
-type AfterActionType<StateType, ActionType> = (store: Store<StateType>, id: number, ctx: GroupEmitter, action: ActionType | StandardGameAction) => void;
+type ActionHookType<StateType, ActionType> = (store: Store<StateType>, id: number, ctx: GroupEmitter, action: ActionType, validation: UserPermissions) => void;
 
 export class ComponentHandler<Data, ActionType extends IAction, HiddenObjectType = any> {
   protected hasHiddenState: boolean;
@@ -35,7 +36,7 @@ export class ComponentHandler<Data, ActionType extends IAction, HiddenObjectType
     this.hasHiddenState = hasHiddenState;
   }
 
-  createComponent(container: StoreContainer<Data, ActionType, HiddenObjectType>, options: GameOptions, afterAction?: AfterActionType<Data, ActionType>) {
+  createComponent(container: StoreContainer<Data, ActionType, HiddenObjectType>, settings: IComponentSettings<Data, ActionType> = {}, initialAction?: ActionType) {
     return (id: number): Component => {
       const component = new GenericComponent<Data, ActionType, HiddenObjectType>(container);
 
@@ -48,10 +49,19 @@ export class ComponentHandler<Data, ActionType extends IAction, HiddenObjectType
         random,
         objects: hiddenObjects,
       };
-      component.container.reducer(context, { type: 'newGame', options });
 
+      const beforeAction = settings.beforeAction;
+      if (beforeAction) {
+        component.beforeActionCallback = (ctx, action, validation) => beforeAction(container.store, id, ctx, action, validation);
+      }
+
+      const afterAction = settings.afterAction;
       if (afterAction) {
-        component.afterActionCallback = (ctx, action) => afterAction(container.store, id, ctx, action);
+        component.afterActionCallback = (ctx, action, validation) => afterAction(container.store, id, ctx, action, validation);
+      }
+
+      if (initialAction) {
+        component.container.reducer(context, initialAction);
       }
 
       const data: ComponentData<Data, ActionType, HiddenObjectType> = {
@@ -78,15 +88,23 @@ export class ComponentHandler<Data, ActionType extends IAction, HiddenObjectType
 
   registerWithCreateHandler(server: IServer, storeConstructor: () => StoreContainer<Data, ActionType, HiddenObjectType>, settings: ICreationSettings<Data, ActionType>): void {
     this.register(server);
-    server.RegisterFunction(this.type + '/createGame', (ctx, options: GameOptions) => {
-      const components: ComponentConstructor[] = [this.createComponent(storeConstructor(), options, settings.afterAction), ...(settings.components ?? [])];
-      return createRoomAndJoin(ctx, options, this.type, components, settings.timeout ?? emptyRoomLifetime);
+
+    server.RegisterFunction(this.type + '/createGame', (ctx, options: RoomOptions) => {
+      const initialAction = settings.initialAction?.(options);
+      const components: ComponentConstructor[] = [this.createComponent(storeConstructor(), settings, initialAction), ...(settings.components ?? [])];
+
+      return createRoomAndJoin(ctx, {
+        seats: options.players,
+        typeId: this.type,
+        components,
+        timeout: settings.timeout ?? emptyRoomLifetime,
+      });
     });
   }
 
   register(server: IServer): void {
     const validationFunction = overridenComponentContainerValidation ?? createUserPermissions;
-    server.RegisterFunction(this.type + '/action', (ctx, roomId: number, action: ActionType | StandardGameAction) => {
+    server.RegisterFunction(this.type + '/action', (ctx, roomId: number, action: ActionType) => {
       const validation = validationFunction(ctx, roomId);
       this.applyAction(ctx, roomId, action, validation);
     });
@@ -101,15 +119,11 @@ export class ComponentHandler<Data, ActionType extends IAction, HiddenObjectType
     });
   }
 
-  protected beforeActionApplied(_ctx: GroupEmitter, _roomId: number, _action: ActionType | StandardGameAction, _validation: UserPermissions): void {
-    // This is a hook for subclasses to implement
-  }
-
-  private applyAction(ctx: GroupEmitter, roomId: number, action: ActionType | StandardGameAction, validation: UserPermissions) {
-    this.beforeActionApplied(ctx, roomId, action, validation);
-
+  private applyAction(ctx: GroupEmitter, roomId: number, action: ActionType, validation: UserPermissions) {
     const componentData = this.get(roomId);
     const objs = componentData.hiddenObjects;
+
+    componentData.component.beforeActionApplied(ctx, action, validation);
 
     const context: Context<HiddenObjectType> = {
       playerValidation: validation,
@@ -142,7 +156,7 @@ export class ComponentHandler<Data, ActionType extends IAction, HiddenObjectType
       ctx.emitToGroup(roomIdToGroup(roomId), this.type + '/onAction', roomId, action, seed);
     }
 
-    componentData.component.afterActionApplied(ctx, action);
+    componentData.component.afterActionApplied(ctx, action, validation);
   }
 
   type: string;
@@ -159,11 +173,19 @@ export function registerGame<Data, ActionType extends IAction, HiddenObjectType 
   const componentHandler = new ComponentHandler<Data, ActionType, HiddenObjectType>(type, settings.hasHiddenState ?? false);
   componentHandler.registerWithCreateHandler(server, storeConstructor, settings);
 }
+
 export interface ICreationSettings<StateType, ActionType> {
   components?: ComponentConstructor[];
-  afterAction?: AfterActionType<StateType, ActionType>;
+  afterAction?: ActionHookType<StateType, ActionType>;
+  beforeAction?: ActionHookType<StateType, ActionType>;
   timeout?: number;
   hasHiddenState?: boolean;
+  initialAction?: (options: RoomOptions) => ActionType | undefined;
+}
+
+export interface IComponentSettings<StateType, ActionType> {
+  afterAction?: ActionHookType<StateType, ActionType>;
+  beforeAction?: ActionHookType<StateType, ActionType>;
 }
 
 class GenericComponent<Data, Action, HiddenType> implements IGenericComponent<Data, Action, HiddenType> {
@@ -172,11 +194,18 @@ class GenericComponent<Data, Action, HiddenType> implements IGenericComponent<Da
     this.container = container;
   }
 
-  afterActionApplied(ctx: GroupEmitter, action: Action): void {
-    if (this.afterActionCallback) {
-      this.afterActionCallback(ctx, action);
+  beforeActionApplied(ctx: GroupEmitter, action: Action, validation: UserPermissions): void {
+    if (this.beforeActionCallback) {
+      this.beforeActionCallback(ctx, action, validation);
     }
   }
 
-  afterActionCallback?: (ctx: GroupEmitter, action: Action | StandardGameAction) => void;
+  afterActionApplied(ctx: GroupEmitter, action: Action, validation: UserPermissions): void {
+    if (this.afterActionCallback) {
+      this.afterActionCallback(ctx, action, validation);
+    }
+  }
+
+  beforeActionCallback?: (ctx: GroupEmitter, action: Action, validation: UserPermissions) => void;
+  afterActionCallback?: (ctx: GroupEmitter, action: Action, validation: UserPermissions) => void;
 }

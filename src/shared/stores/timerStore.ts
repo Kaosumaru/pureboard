@@ -1,5 +1,4 @@
 import { Context, UserPermissions, StoreContainer } from '../interface';
-import { StandardGameAction } from '../standardActions';
 import { createComponentStore } from '../store';
 
 export interface SetActivePlayerAction {
@@ -85,14 +84,12 @@ function setActivePlayer(playerValidation: UserPermissions, data: StoreData, pla
   };
 }
 
-function makeAction(ctx: Context, store: StoreData, action: Action | StandardGameAction): StoreData | Partial<StoreData> {
+function makeAction(ctx: Context, store: StoreData, action: Action): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'setActivePlayer':
       return setActivePlayer(ctx.playerValidation, store, action.player, action.currentTimestamp);
     case 'restart':
       if (!ctx.playerValidation.isServerOriginating()) throw new Error('Not server originating');
       return { ...store, activePlayer: undefined, players: createPlayers(store.players.length) };
-    case 'newGame':
-      return { ...store };
   }
 }

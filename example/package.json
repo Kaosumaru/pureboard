@@ -2,6 +2,7 @@
     "name": "pureboard-example",
     "private": true,
     "scripts": {
+        "build": "tsc",
         "dev": "nodemon src/server/index.ts --host"
     },
     "dependencies": {

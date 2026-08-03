@@ -3,7 +3,6 @@ import { Context } from 'yawr';
 import { UserPermissions } from '../shared/interface';
 import { generate as generateRandomString } from 'randomstring';
 import { IServer } from './interface';
-import { GameOptions } from '../shared/standardActions';
 
 export type ComponentConstructor = (roomId: number) => [string, never];
 export type Component = [string, never];
@@ -20,6 +19,13 @@ interface GameRoom {
 
   // Components are stored in a map keyed by component type.
   components: ComponentsMap;
+}
+
+export interface RoomOptions {
+  seats: number;
+  typeId: string;
+  components: ComponentConstructor[];
+  timeout?: number;
 }
 
 /**
@@ -128,8 +134,8 @@ function joinRoom(ctx: Context, roomId: number, password?: string): GameRoomData
  * @param timeout - Empty-room timeout in milliseconds.
  * @returns Created game room data.
  */
-export function createRoomAndJoin(ctx: Context, options: GameOptions, type: string, components: ComponentConstructor[], timeout: number): GameRoomData {
-  const room = createRoom(options, type, components, timeout);
+export function createRoomAndJoin(ctx: Context, options: RoomOptions): GameRoomData {
+  const room = createRoom(options);
 
   room.joinedUsers.set(ctx.userId ?? '', 1);
   ctx.addToGroup(roomToGroup(room.data));
@@ -163,16 +169,16 @@ export function deleteRoom(server: IServer, roomId: number): boolean {
  * @param timeout - Optional empty-room timeout in milliseconds.
  * @returns The created game room with data and initialized components.
  */
-export function createRoom(options: GameOptions, type: string, components: ComponentConstructor[], timeout?: number): GameRoom {
+export function createRoom(options: RoomOptions): GameRoom {
   lastId++;
   const id = lastId;
 
-  const seats = Array.from({ length: options.players }, () => null);
+  const seats = Array.from({ length: options.seats }, () => null);
   const data: GameRoomData = {
     id,
     seats,
-    type,
-    timeoutToClose: timeout,
+    type: options.typeId,
+    timeoutToClose: options.timeout,
     closed: false,
     password: generateRandomString({ length: 8, charset: 'alphanumeric', capitalization: 'lowercase' }),
   };
@@ -180,7 +186,7 @@ export function createRoom(options: GameOptions, type: string, components: Compo
   const room: GameRoom = {
     data,
     joinedUsers: new Map<string, number>(),
-    components: buildComponentMap(id, components),
+    components: buildComponentMap(id, options.components),
   };
 
   rooms.set(id, room);
