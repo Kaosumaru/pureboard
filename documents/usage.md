@@ -158,7 +158,6 @@ Use `useClient` to create and initialize game/component clients.
 
 ```tsx
 import { useClient } from 'pureboard/client/react';
-import { ChatClient } from 'pureboard/client/clients/chatClient';
 import { GameRoomClient } from 'pureboard/client/gameRoomClient';
 import { ConnectFourClient } from './ConnectFourClient';
 
@@ -168,7 +167,6 @@ export interface GameProps {
 
 export default function ConnectFour(props: GameProps) {
   const client = useClient(ConnectFourClient, props.gameRoomClient);
-  const chatClient = useClient(ChatClient, props.gameRoomClient);
 
   const board = client.store(state => state.board);
   const currentPlayer = client.store(state => state.currentPlayer);

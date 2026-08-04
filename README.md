@@ -12,15 +12,29 @@
 
 [Overview][overview-url]
 
+## Pitch
+
+Do you want to implement multiplayer turn based game, but replication and visualization is a headache?
+Worry not, just:
+1. Implement game as pure functions mutating a [state](https://github.com/Kaosumaru/pureboard/blob/main/example/src/shared/stores/connectFourStore.ts)
+2. Create a React (or React Fiber if you want 3D) [component](https://github.com/Kaosumaru/pureboard/blob/main/example/src/client/pages/GamePage/Connect4/ConnectFour.tsx) to display that
+3. Let `pureboard` handle the rest - game is now playable online
+
 ## Install
 
 ```bash
 npm install pureboard
 ```
 
-## Usage
+## Overview
 
 pureboard is a library that allows for easy implementation of multiplayer games, by replicating actions on a state. It's designed for boardgame-like games, but can be used for other projects. It uses zustand for state management, so replicated state on client can be easily used in a React project.
+
+## How it works?
+
+Players are sending `actions` that can mutate server game state.
+First, server tries to apply the action on it's state, and if it's valid, it get's send to all players.
+
 
 [Usage][usage-url]
 
