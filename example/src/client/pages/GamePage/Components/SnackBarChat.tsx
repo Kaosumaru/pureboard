@@ -1,5 +1,5 @@
 import { SnackBar } from './SnackBar';
-import { ChatClient } from 'pureboard/client/clients/chatClient';
+import { ChatClient } from 'pureboard/client';
 
 export interface SnackBarProps {
   client: ChatClient;

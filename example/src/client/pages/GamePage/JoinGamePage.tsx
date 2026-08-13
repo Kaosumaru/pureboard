@@ -1,6 +1,6 @@
 import './GamePage.css';
 import { JSX, useEffect, useState } from 'react';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { GameRoomClient } from 'pureboard/client';
 import { useParams } from 'react-router-dom';
 import GamePage from './GamePage';
 import { useLoginContext } from '../LoginPage/LoginPage';

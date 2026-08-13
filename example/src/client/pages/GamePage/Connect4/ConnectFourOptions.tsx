@@ -1,5 +1,5 @@
 import { Button, Stack } from '@mui/material';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { GameRoomClient } from 'pureboard/client';
 import { ConnectFourClient } from './ConnectFourClient';
 import { useLoginContext } from '@client/pages/LoginPage/LoginPage';
 

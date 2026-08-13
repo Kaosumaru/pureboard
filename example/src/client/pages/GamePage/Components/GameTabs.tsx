@@ -1,14 +1,11 @@
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { GameRoomClient, ChatClient, IBaseComponentClient, useClient } from 'pureboard/client';
 import { Badge, Stack, Tab, Tabs } from '@mui/material';
 import MessageIcon from '@mui/icons-material/Message';
 import CasinoIcon from '@mui/icons-material/Casino';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { JSX, useState } from 'react';
-import { ChatClient } from 'pureboard/client/clients/chatClient';
 import { SnackBarChat } from './SnackBarChat';
 import GameChat from './GameChat';
-import { useClient } from 'pureboard/client/react';
-import { IBaseComponentClient } from 'pureboard/client/interface';
 
 export interface GameTabsProps {
   gameClient: IBaseComponentClient;

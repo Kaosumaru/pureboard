@@ -1,7 +1,7 @@
 import ConnectFour from './Connect4/ConnectFour';
 
 import './GamePage.css';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { GameRoomClient } from 'pureboard/client';
 import { JSX, useEffect, useState } from 'react';
 import { Main } from '@client/utils/Main';
 import { Button } from '@mui/material';

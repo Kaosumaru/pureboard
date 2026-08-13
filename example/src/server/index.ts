@@ -1,10 +1,8 @@
 import express from 'express';
 import ViteExpress from 'vite-express';
-import { createServer } from 'pureboard/server/server';
-import { UserInfo } from 'pureboard/shared/gameRoomStore';
+import { createServer, createChat, registerGame } from 'pureboard/server';
+import { UserInfo } from 'pureboard/shared';
 import { createGameStateStore } from '@shared/stores/connectFourStore';
-import { createChat } from 'pureboard/server/components/chat';
-import { registerGame } from 'pureboard/server/components';
 
 try {
   // create express server

@@ -1,6 +1,6 @@
-import { ChatClient } from 'pureboard/client/clients/chatClient';
+import { ChatClient } from 'pureboard/client';
+import { Message } from 'pureboard/shared';
 import { ChatThread, ChatThreadEntry } from './ChatThread';
-import { Message } from 'pureboard/shared/stores/chatStore';
 
 export interface GameChatProps {
   client: ChatClient;

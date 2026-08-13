@@ -1,5 +1,5 @@
-import { Context, StoreContainer, UserPermissions } from 'pureboard/shared/interface';
-import { createComponentStore } from 'pureboard/shared/store';
+import { Context, StoreContainer, UserPermissions } from 'pureboard/shared';
+import { createComponentStore } from 'pureboard/shared';
 
 export enum FieldType {
   Empty,

@@ -3,11 +3,10 @@ import { ConnectFourClient } from './ConnectFourClient';
 import ConnectFourSquare from './ConnectFourSquare';
 import { createContent } from './interface';
 import './styles.css';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
-import { UserInfo } from 'pureboard/shared/gameRoomStore';
+import { GameRoomClient, useClient } from 'pureboard/client';
+import { UserInfo } from 'pureboard/shared';
 import { motion } from 'motion/react';
 import ConnectFourOptions from './ConnectFourOptions';
-import { useClient } from 'pureboard/client/react';
 import GameTabs, { ETabs } from '../Components/GameTabs';
 import { SpecificGameProps } from '../GamePage';
 

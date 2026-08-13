@@ -1,7 +1,6 @@
 import { Action, StoreData, createGameStateStore } from '@shared/stores/connectFourStore';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
-import { seatOf } from 'pureboard/shared/gameRoomStore';
-import { BaseGameClient } from 'pureboard/client/baseGameClient';
+import { BaseGameClient, GameRoomClient } from 'pureboard/client';
+import { seatOf } from 'pureboard/shared';
 
 export class ConnectFourClient extends BaseGameClient<StoreData, Action> {
   constructor(gameRoomClient: GameRoomClient) {
