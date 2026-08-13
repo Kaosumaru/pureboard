@@ -7,8 +7,7 @@ This page follows the Connect4 example in `example/src` and reflects the current
 Define your `Action` union, `StoreData`, and reducer. Then expose a `createGameStateStore` function that returns `StoreContainer`.
 
 ```ts
-import { Context, StoreContainer, UserPermissions } from 'pureboard/shared/interface';
-import { createComponentStore } from 'pureboard/shared/store';
+import { Context, StoreContainer, UserPermissions, createComponentStore } from 'pureboard/shared';
 
 export interface NewGameAction {
   type: 'newGame';
@@ -75,9 +74,7 @@ Create a websocket server with `createServer`, then call `registerGame`.
 ```ts
 import express from 'express';
 import ViteExpress from 'vite-express';
-import { createServer } from 'pureboard/server/server';
-import { createChat } from 'pureboard/server/components/chat';
-import { registerGame } from 'pureboard/server/components';
+import { createServer, createChat, registerGame } from 'pureboard/server';
 import { createGameStateStore } from '@shared/stores/connectFourStore';
 
 const app = express();
@@ -111,7 +108,7 @@ server.on('upgrade', (request, socket, head) => {
 `GameRoomClient` manages room lifecycle and auth.
 
 ```ts
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { GameRoomClient } from 'pureboard/client';
 
 const roomClient = new GameRoomClient();
 const ok = await roomClient.start(userToken);
@@ -129,8 +126,7 @@ await roomClient.takeAvailableSeat();
 Extend `BaseGameClient` and wrap common actions.
 
 ```ts
-import { BaseGameClient } from 'pureboard/client/baseGameClient';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { BaseGameClient, GameRoomClient } from 'pureboard/client';
 import { Action, StoreData, createGameStateStore } from '@shared/stores/connectFourStore';
 
 export class ConnectFourClient extends BaseGameClient<StoreData, Action> {
@@ -157,8 +153,7 @@ export class ConnectFourClient extends BaseGameClient<StoreData, Action> {
 Use `useClient` to create and initialize game/component clients.
 
 ```tsx
-import { useClient } from 'pureboard/client/react';
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { useClient, GameRoomClient } from 'pureboard/client';
 import { ConnectFourClient } from './ConnectFourClient';
 
 export interface GameProps {

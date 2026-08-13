@@ -41,9 +41,7 @@ Current implementation is server-based: after game action is applied, hook appli
 
 To achieve that, `afterAction` hook is used:
 ```ts
-import { registerGame } from 'pureboard/server/components';
-import { createChat } from 'pureboard/server/components/chat';
-import { createTimer, applyActionOnTimer } from 'pureboard/server/components/timer';
+import { registerGame, createChat, createTimer, applyActionOnTimer } from 'pureboard/server';
 
 const players = 2;
 const timeInSeconds = 10 * 60;
