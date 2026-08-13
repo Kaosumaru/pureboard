@@ -3,6 +3,38 @@
   "version": "0.0.0-development",
   "description": "A library for creating multiplayer boardgames",
   "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./shared": {
+      "types": "./shared/index.d.ts",
+      "default": "./shared/index.js"
+    },
+    "./shared/*": {
+      "types": "./shared/*.d.ts",
+      "default": "./shared/*.js"
+    },
+    "./client": {
+      "types": "./client/index.d.ts",
+      "default": "./client/index.js"
+    },
+    "./client/*": {
+      "types": "./client/*.d.ts",
+      "default": "./client/*.js"
+    },
+    "./server": {
+      "types": "./server/index.d.ts",
+      "default": "./server/index.js"
+    },
+    "./server/*": {
+      "types": "./server/*.d.ts",
+      "default": "./server/*.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "**/*"
   ],
