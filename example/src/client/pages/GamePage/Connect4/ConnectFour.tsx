@@ -3,12 +3,12 @@ import { ConnectFourClient } from './ConnectFourClient';
 import ConnectFourSquare from './ConnectFourSquare';
 import { createContent } from './interface';
 import './styles.css';
-import { GameRoomClient, useClient } from 'pureboard/client';
+import { GameRoomClient, GameRoomContext, useClient } from 'pureboard/client';
 import { UserInfo } from 'pureboard/shared';
 import { motion } from 'motion/react';
 import ConnectFourOptions from './ConnectFourOptions';
 import GameTabs, { ETabs } from '../Components/GameTabs';
-import { SpecificGameProps } from '../GamePage';
+import { createContext, ReactNode, useContext } from 'react';
 
 function createPlayer(seat: UserInfo | null, index: number, gameRoomClient: GameRoomClient) {
   if (seat) return <h2>{seat.name}</h2>;
@@ -45,10 +45,15 @@ function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, gam
   );
 }
 
-function ConnectFourGame(props: SpecificGameProps & { client: ConnectFourClient }) {
-  const client = props.client;
+function ConnectFourGame() {
+  const gameRoomClient = useContext(GameRoomContext);
+  const client = useContext(ConnectFourContext);
 
-  const seats = props.gameRoomClient.store(state => state.seats);
+  if (!gameRoomClient || !client) {
+    throw new Error('ConnectFourGame must be used within a GameRoomProvider and ConnectFourProvider');
+  }
+
+  const seats = gameRoomClient.store(state => state.seats);
   const board = client.store(state => state.board);
   const currentPlayer = client.store(state => state.currentPlayer);
   const winner = client.store(state => state.victoriousPlayer);
@@ -81,25 +86,34 @@ function ConnectFourGame(props: SpecificGameProps & { client: ConnectFourClient 
           {createContent(winner + 1)}
         </div>
       ) : (
-        createPlayersRow(seats, currentPlayer, props.gameRoomClient)
+        createPlayersRow(seats, currentPlayer, gameRoomClient)
       )}
       <div className={'cf-Container'}>{fullBoard}</div>
     </div>
   );
 }
 
-export default function ConnectFour(props: SpecificGameProps) {
-  const client = useClient(ConnectFourClient, props.gameRoomClient);
+export const ConnectFourContext = createContext<ConnectFourClient | null>(null);
 
+function ConnectFourProvider({ children }: { children: ReactNode }) {
+  const client = useClient(ConnectFourClient);
+  return <ConnectFourContext.Provider value={client}>{children}</ConnectFourContext.Provider>;
+}
+
+export default function ConnectFour() {
   const createComponent = (tab: ETabs) => {
     switch (tab) {
       case ETabs.Game:
-        return <ConnectFourGame gameRoomClient={props.gameRoomClient} client={client} />;
+        return <ConnectFourGame />;
       case ETabs.Settings:
-        return <ConnectFourOptions gameRoomClient={props.gameRoomClient} client={client} />;
+        return <ConnectFourOptions />;
     }
     return <></>;
   };
 
-  return <GameTabs gameClient={client} gameRoomClient={props.gameRoomClient} createComponent={createComponent} />;
+  return (
+    <ConnectFourProvider>
+      <GameTabs createComponent={createComponent} />
+    </ConnectFourProvider>
+  );
 }

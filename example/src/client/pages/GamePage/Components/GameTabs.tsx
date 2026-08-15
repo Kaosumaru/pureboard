@@ -1,22 +1,26 @@
-import { GameRoomClient, ChatClient, IBaseComponentClient, useClient } from 'pureboard/client';
+import { ChatClient, GameRoomContext, useClient } from 'pureboard/client';
 import { Badge, Stack, Tab, Tabs } from '@mui/material';
 import MessageIcon from '@mui/icons-material/Message';
 import CasinoIcon from '@mui/icons-material/Casino';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { JSX, useState } from 'react';
+import { JSX, useContext, useState } from 'react';
 import { SnackBarChat } from './SnackBarChat';
 import GameChat from './GameChat';
 
 export interface GameTabsProps {
-  gameClient: IBaseComponentClient;
-  gameRoomClient: GameRoomClient;
   createComponent: (currentTab: ETabs) => JSX.Element;
   padding?: boolean;
 }
 
 export default function GameTabs(props: GameTabsProps): JSX.Element {
+  const gameRoomClient = useContext(GameRoomContext);
+
+  if (!gameRoomClient) {
+    throw new Error('ConnectFourGame must be used within a GameRoomProvider and ConnectFourProvider');
+  }
+
   const [tab, setTab] = useState<ETabs>(ETabs.Game);
-  const chatClient = useClient(ChatClient, props.gameRoomClient);
+  const chatClient = useClient(ChatClient);
 
   const messages = chatClient.store(state => state.messages);
   const [readMessages, setReadMessages] = useState(0);
@@ -30,7 +34,7 @@ export default function GameTabs(props: GameTabsProps): JSX.Element {
         <>
           <GameChat
             client={chatClient}
-            ownId={props.gameRoomClient.userInfo?.id ?? ''}
+            ownId={gameRoomClient.userInfo?.id ?? ''}
             readMessages={readMessages}
             setReadMessages={setReadMessages}
           />

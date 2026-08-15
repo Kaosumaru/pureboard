@@ -1,15 +1,16 @@
 import { Button, Stack } from '@mui/material';
-import { GameRoomClient } from 'pureboard/client';
-import { ConnectFourClient } from './ConnectFourClient';
 import { useLoginContext } from '@client/pages/LoginPage/LoginPage';
+import { useContext } from 'react';
+import { ConnectFourContext } from './ConnectFour';
 
-export interface ConnectFourOptionsProps {
-  gameRoomClient: GameRoomClient;
-  client: ConnectFourClient;
-}
+export default function ConnectFourOptions() {
+  const client = useContext(ConnectFourContext);
 
-export default function ConnectFourOptions(props: ConnectFourOptionsProps) {
-  const winner = props.client.store(state => state.victoriousPlayer);
+  if (!client) {
+    throw new Error('ConnectFourGame must be used within a GameRoomProvider and ConnectFourProvider');
+  }
+
+  const winner = client.store(state => state.victoriousPlayer);
   const context = useLoginContext();
 
   return (
@@ -18,7 +19,7 @@ export default function ConnectFourOptions(props: ConnectFourOptionsProps) {
         <Button
           variant="outlined"
           onClick={() => {
-            void props.client.surrender();
+            void client.surrender();
           }}
         >
           Surrender
@@ -28,7 +29,7 @@ export default function ConnectFourOptions(props: ConnectFourOptionsProps) {
         <Button
           variant="outlined"
           onClick={() => {
-            void props.client.newGame();
+            void client.newGame();
           }}
         >
           New Game

@@ -1,6 +1,5 @@
 export * from './baseClient';
 export * from './baseComponentClient';
-export * from './baseGameClient';
 export * from './clientHiddenObjects';
 export * from './clientRandom';
 export * from './gameRoomClient';

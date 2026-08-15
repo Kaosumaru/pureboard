@@ -1,10 +1,10 @@
 import { Action, StoreData, createGameStateStore } from '@shared/stores/connectFourStore';
-import { BaseGameClient, GameRoomClient } from 'pureboard/client';
-import { seatOf } from 'pureboard/shared';
+import { BaseComponentClient, GameRoomClient } from 'pureboard/client';
 
-export class ConnectFourClient extends BaseGameClient<StoreData, Action> {
+export class ConnectFourClient extends BaseComponentClient<StoreData, Action> {
   constructor(gameRoomClient: GameRoomClient) {
     super(createGameStateStore(), 'connect4', gameRoomClient);
+    this.gameRoomClient = gameRoomClient;
   }
 
   public async makeMove(column: number) {
@@ -12,12 +12,21 @@ export class ConnectFourClient extends BaseGameClient<StoreData, Action> {
   }
 
   public async surrender() {
-    const myId = this.gameRoomClient.userInfo?.id ?? '';
-    const player = seatOf(myId, this.gameRoomState());
+    const player = this.seatOf();
     await this.sendAction({ type: 'surrender', player });
   }
 
   public async newGame() {
     await this.sendAction({ type: 'newGame' });
   }
+
+  public seatOf(): number {
+    return this.gameRoomClient.seatOf();
+  }
+
+  haveSeat(index: number): boolean {
+    return this.gameRoomClient.haveSeat(index);
+  }
+
+  gameRoomClient: GameRoomClient;
 }

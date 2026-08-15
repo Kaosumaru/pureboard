@@ -1,7 +1,7 @@
 import ConnectFour from './Connect4/ConnectFour';
 
 import './GamePage.css';
-import { GameRoomClient } from 'pureboard/client';
+import { GameRoomClient, GameRoomContext } from 'pureboard/client';
 import { JSX, useEffect, useState } from 'react';
 import { Main } from '@client/utils/Main';
 import { Button } from '@mui/material';
@@ -11,14 +11,10 @@ export interface GameProps {
   userId: string;
 }
 
-export interface SpecificGameProps {
-  gameRoomClient: GameRoomClient;
-}
-
 interface GameWrapperProps {
   client: GameRoomClient;
   userId: string;
-  gameElement: (props: SpecificGameProps) => JSX.Element;
+  gameElement: () => JSX.Element;
 }
 
 function getReconnectDelay(tries: number) {
@@ -89,7 +85,9 @@ function GameWrapper(props: GameWrapperProps): JSX.Element {
 
   return (
     <Main>
-      <props.gameElement gameRoomClient={props.client} />
+      <GameRoomContext.Provider value={props.client}>
+        <props.gameElement />
+      </GameRoomContext.Provider>
     </Main>
   );
 }
