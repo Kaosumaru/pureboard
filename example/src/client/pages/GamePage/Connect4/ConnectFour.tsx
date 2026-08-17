@@ -1,14 +1,14 @@
 import { Button } from '@mui/material';
-import { ConnectFourClient } from './ConnectFourClient';
 import ConnectFourSquare from './ConnectFourSquare';
 import { createContent } from './interface';
 import './styles.css';
-import { GameRoomClient, GameRoomContext, useClient } from 'pureboard/client';
+import { GameRoomClient, GameRoomContext } from 'pureboard/client';
 import { UserInfo } from 'pureboard/shared';
 import { motion } from 'motion/react';
 import ConnectFourOptions from './ConnectFourOptions';
 import GameTabs, { ETabs } from '../Components/GameTabs';
-import { createContext, ReactNode, useContext } from 'react';
+import { useContext } from 'react';
+import { ConnectFourProvider, useConnect4 } from './ConnectFourClient';
 
 function createPlayer(seat: UserInfo | null, index: number, gameRoomClient: GameRoomClient) {
   if (seat) return <h2>{seat.name}</h2>;
@@ -47,18 +47,19 @@ function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, gam
 
 function ConnectFourGame() {
   const gameRoomClient = useContext(GameRoomContext);
-  const client = useContext(ConnectFourContext);
 
-  if (!gameRoomClient || !client) {
+  if (!gameRoomClient) {
     throw new Error('ConnectFourGame must be used within a GameRoomProvider and ConnectFourProvider');
   }
 
   const seats = gameRoomClient.store(state => state.seats);
-  const board = client.store(state => state.board);
-  const currentPlayer = client.store(state => state.currentPlayer);
-  const winner = client.store(state => state.victoriousPlayer);
-  const lastMoveColumn = client.store(state => state.lastMoveColumn);
-  const lastMoveRow = client.store(state => state.lastMoveRow);
+
+  const { store, action } = useConnect4();
+  const board = store(state => state.board);
+  const currentPlayer = store(state => state.currentPlayer);
+  const winner = store(state => state.victoriousPlayer);
+  const lastMoveColumn = store(state => state.lastMoveColumn);
+  const lastMoveRow = store(state => state.lastMoveRow);
 
   const fullBoard = board.map((row, rowIdx) => {
     return row.map((_, colIdx) => {
@@ -71,7 +72,7 @@ function ConnectFourGame() {
           field={board[rowIdx][colIdx]}
           isLastMove={isLastMove}
           onClick={(_, colIdx) => {
-            void client.makeMove(colIdx);
+            void action({ type: 'move', column: colIdx });
           }}
         />
       );
@@ -91,13 +92,6 @@ function ConnectFourGame() {
       <div className={'cf-Container'}>{fullBoard}</div>
     </div>
   );
-}
-
-export const ConnectFourContext = createContext<ConnectFourClient | null>(null);
-
-function ConnectFourProvider({ children }: { children: ReactNode }) {
-  const client = useClient(ConnectFourClient);
-  return <ConnectFourContext.Provider value={client}>{children}</ConnectFourContext.Provider>;
 }
 
 export default function ConnectFour() {

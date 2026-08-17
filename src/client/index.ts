@@ -5,5 +5,6 @@ export * from './clientRandom';
 export * from './gameRoomClient';
 export * from './interface';
 export * from './react';
+export * from './reactComponents';
 export * from './clients/chatClient';
 export * from './clients/timerClient';
