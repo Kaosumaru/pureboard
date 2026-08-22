@@ -26,7 +26,6 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     super(client.client);
 
     this.gameId = client.gameId;
-
     this.container = container;
     this.store = container.store;
     this.type = type;

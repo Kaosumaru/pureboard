@@ -1,11 +1,10 @@
 import { Button, Stack } from '@mui/material';
 import { useLoginContext } from '@client/pages/LoginPage/LoginPage';
 import { useConnect4 } from './ConnectFourClient';
-import { GameRoomContext } from 'pureboard/client/react';
-import { useContext } from 'react';
+import { useSeatingContext } from 'pureboard/client/react';
 
 export default function ConnectFourOptions() {
-  const gameRoomClient = useContext(GameRoomContext);
+  const seating = useSeatingContext();
   const { store, action } = useConnect4();
 
   const winner = store(state => state.victoriousPlayer);
@@ -17,7 +16,7 @@ export default function ConnectFourOptions() {
         <Button
           variant="outlined"
           onClick={() => {
-            void action({ type: 'surrender', player: gameRoomClient?.seatOf() ?? 0 });
+            void action({ type: 'surrender', player: seating.seatOf() ?? 0 });
           }}
         >
           Surrender

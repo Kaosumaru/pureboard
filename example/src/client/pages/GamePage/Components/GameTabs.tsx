@@ -1,9 +1,9 @@
-import { ChatClient, GameRoomContext, useClient } from 'pureboard/client';
+import { ChatClient, useClient, useConnectionContext } from 'pureboard/client';
 import { Badge, Stack, Tab, Tabs } from '@mui/material';
 import MessageIcon from '@mui/icons-material/Message';
 import CasinoIcon from '@mui/icons-material/Casino';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { JSX, useContext, useState } from 'react';
+import { JSX, useState } from 'react';
 import { SnackBarChat } from './SnackBarChat';
 import GameChat from './GameChat';
 
@@ -13,11 +13,7 @@ export interface GameTabsProps {
 }
 
 export default function GameTabs(props: GameTabsProps): JSX.Element {
-  const gameRoomClient = useContext(GameRoomContext);
-
-  if (!gameRoomClient) {
-    throw new Error('ConnectFourGame must be used within a GameRoomProvider and ConnectFourProvider');
-  }
+  const connection = useConnectionContext();
 
   const [tab, setTab] = useState<ETabs>(ETabs.Game);
   const chatClient = useClient(ChatClient);
@@ -34,7 +30,7 @@ export default function GameTabs(props: GameTabsProps): JSX.Element {
         <>
           <GameChat
             client={chatClient}
-            ownId={gameRoomClient.userInfo?.id ?? ''}
+            ownId={connection.userInfo?.id ?? ''}
             readMessages={readMessages}
             setReadMessages={setReadMessages}
           />

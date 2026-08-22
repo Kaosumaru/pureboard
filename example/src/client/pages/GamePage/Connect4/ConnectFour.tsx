@@ -2,15 +2,14 @@ import { Button } from '@mui/material';
 import ConnectFourSquare from './ConnectFourSquare';
 import { createContent } from './interface';
 import './styles.css';
-import { GameRoomClient, GameRoomContext } from 'pureboard/client';
+import { SeatInterface, useSeatingContext } from 'pureboard/client';
 import { UserInfo } from 'pureboard/shared';
 import { motion } from 'motion/react';
 import ConnectFourOptions from './ConnectFourOptions';
 import GameTabs, { ETabs } from '../Components/GameTabs';
-import { useContext } from 'react';
 import { ConnectFourProvider, useConnect4 } from './ConnectFourClient';
 
-function createPlayer(seat: UserInfo | null, index: number, gameRoomClient: GameRoomClient) {
+function createPlayer(seat: UserInfo | null, index: number, seats: SeatInterface) {
   if (seat) return <h2>{seat.name}</h2>;
   return (
     <h2>
@@ -18,7 +17,7 @@ function createPlayer(seat: UserInfo | null, index: number, gameRoomClient: Game
       <Button
         variant="outlined"
         onClick={() => {
-          void gameRoomClient.takeSeat(index);
+          void seats.takeSeat(index);
         }}
       >
         Take seat
@@ -27,11 +26,11 @@ function createPlayer(seat: UserInfo | null, index: number, gameRoomClient: Game
   );
 }
 
-function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, gameRoomClient: GameRoomClient) {
+function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, seat: SeatInterface) {
   return (
     <div className="current-player-container">
       <motion.span style={{ display: 'inline' }} initial={false} animate={{ opacity: currentPlayer == 0 ? 1 : 0.3 }}>
-        {createPlayer(seats[0], 0, gameRoomClient)}
+        {createPlayer(seats[0], 0, seat)}
         &nbsp;&nbsp;&nbsp;
         {createContent(1)}
       </motion.span>
@@ -39,20 +38,16 @@ function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, gam
       <motion.span style={{ display: 'inline' }} initial={false} animate={{ opacity: currentPlayer == 1 ? 1 : 0.3 }}>
         {createContent(2)}
         &nbsp;&nbsp;&nbsp;
-        {createPlayer(seats[1], 1, gameRoomClient)}
+        {createPlayer(seats[1], 1, seat)}
       </motion.span>
     </div>
   );
 }
 
 function ConnectFourGame() {
-  const gameRoomClient = useContext(GameRoomContext);
+  const seating = useSeatingContext();
 
-  if (!gameRoomClient) {
-    throw new Error('ConnectFourGame must be used within a GameRoomProvider and ConnectFourProvider');
-  }
-
-  const seats = gameRoomClient.store(state => state.seats);
+  const seats = seating.store(state => state.seats);
 
   const { store, action } = useConnect4();
   const board = store(state => state.board);
@@ -87,7 +82,7 @@ function ConnectFourGame() {
           {createContent(winner + 1)}
         </div>
       ) : (
-        createPlayersRow(seats, currentPlayer, gameRoomClient)
+        createPlayersRow(seats, currentPlayer, seating)
       )}
       <div className={'cf-Container'}>{fullBoard}</div>
     </div>
