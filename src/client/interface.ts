@@ -29,7 +29,7 @@ export interface IBaseComponentClient {
   type: string;
 }
 
-export interface SeatInterface {
+export interface SeatingInterface {
   /**
    * The Redux-like store that manages the state of the game room.
    */

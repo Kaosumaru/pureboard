@@ -2,14 +2,14 @@ import { Button } from '@mui/material';
 import ConnectFourSquare from './ConnectFourSquare';
 import { createContent } from './interface';
 import './styles.css';
-import { SeatInterface, useSeatingContext } from 'pureboard/client';
+import { SeatingInterface, useSeatingContext } from 'pureboard/client';
 import { UserInfo } from 'pureboard/shared';
 import { motion } from 'motion/react';
 import ConnectFourOptions from './ConnectFourOptions';
 import GameTabs, { ETabs } from '../Components/GameTabs';
 import { ConnectFourProvider, useConnect4 } from './ConnectFourClient';
 
-function createPlayer(seat: UserInfo | null, index: number, seats: SeatInterface) {
+function createPlayer(seat: UserInfo | null, index: number, seats: SeatingInterface) {
   if (seat) return <h2>{seat.name}</h2>;
   return (
     <h2>
@@ -26,7 +26,7 @@ function createPlayer(seat: UserInfo | null, index: number, seats: SeatInterface
   );
 }
 
-function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, seat: SeatInterface) {
+function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, seat: SeatingInterface) {
   return (
     <div className="current-player-container">
       <motion.span style={{ display: 'inline' }} initial={false} animate={{ opacity: currentPlayer == 0 ? 1 : 0.3 }}>

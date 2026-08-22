@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, createContext, useContext } from 'react';
 import { BaseComponentClient } from './baseComponentClient';
-import { ConnectionInterface, IDisposableClient, RoomInterface, SeatInterface } from './interface';
+import { ConnectionInterface, IDisposableClient, RoomInterface, SeatingInterface } from './interface';
 import { GameRoomClient } from './gameRoomClient';
 
 type InferAction<T> = T extends BaseComponentClient<any, infer Action, any> ? Action : never;
@@ -33,7 +33,7 @@ export function useConnectionContext(): ConnectionInterface {
   return gameRoomClient;
 }
 
-export function useSeatingContext(): SeatInterface {
+export function useSeatingContext(): SeatingInterface {
   const gameRoomClient = useContext(GameRoomContext);
   if (gameRoomClient === null) {
     throw new Error('useSeatingContext must be used within a GameRoomProvider');

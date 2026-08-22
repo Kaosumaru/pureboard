@@ -2,7 +2,7 @@ import { canUserMoveAsPlayer, createGameRoomStore, GameRoomData, GameRoomState, 
 import { GameOptions, Store } from '../shared';
 import { RPCClient } from 'yawr';
 import { BaseClient } from './baseClient';
-import { ConnectionInterface, IGameRoomClient, RoomInterface, SeatInterface } from './interface';
+import { ConnectionInterface, IGameRoomClient, RoomInterface, SeatingInterface } from './interface';
 
 /**
  * The `GameRoomClient` class extends the `BaseClient` and provides functionality
@@ -10,7 +10,7 @@ import { ConnectionInterface, IGameRoomClient, RoomInterface, SeatInterface } fr
  * handles WebSocket events, and provides methods for creating, joining, and managing
  * game rooms and seats.
  */
-export class GameRoomClient extends BaseClient implements IGameRoomClient, SeatInterface, ConnectionInterface, RoomInterface {
+export class GameRoomClient extends BaseClient implements IGameRoomClient, SeatingInterface, ConnectionInterface, RoomInterface {
   public gameId: number | undefined;
   public gamePassword: string | undefined;
   public userInfo: UserInfo | undefined;
