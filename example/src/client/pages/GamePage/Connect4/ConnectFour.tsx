@@ -2,7 +2,7 @@ import { Button } from '@mui/material';
 import ConnectFourSquare from './ConnectFourSquare';
 import { createContent } from './interface';
 import './styles.css';
-import { SeatingInterface, useSeatingContext } from 'pureboard/client';
+import { ChatProvider, SeatingInterface, useSeatingContext } from 'pureboard/client';
 import { UserInfo } from 'pureboard/shared';
 import { motion } from 'motion/react';
 import ConnectFourOptions from './ConnectFourOptions';
@@ -102,7 +102,9 @@ export default function ConnectFour() {
 
   return (
     <ConnectFourProvider>
-      <GameTabs createComponent={createComponent} />
+      <ChatProvider>
+        <GameTabs createComponent={createComponent} />
+      </ChatProvider>
     </ConnectFourProvider>
   );
 }
