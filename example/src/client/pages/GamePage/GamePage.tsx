@@ -28,6 +28,7 @@ function GameWrapper(props: GameWrapperProps): JSX.Element {
   const [triesToConnect, setTriesToConnect] = useState(0);
 
   useEffect(() => {
+    // TODO client should have a store for connection state, so we don't have to manage it here?
     const connection = props.client.onDisconnected(() => setDisconnected(true));
     const connection2 = props.client.onAuthorized(() => {
       setDisconnected(false);
@@ -39,6 +40,7 @@ function GameWrapper(props: GameWrapperProps): JSX.Element {
     };
   }, [props.client]);
 
+  // TODO this sounds like client logic, not UI logic. Maybe we should move it to the client?
   useEffect(() => {
     if (!disconnected) {
       setAutoreconnecting(false);

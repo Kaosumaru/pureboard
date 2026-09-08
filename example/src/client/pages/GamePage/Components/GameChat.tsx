@@ -22,6 +22,7 @@ function messagesToChatEntries(messages: Message[], props: GameChatProps): ChatT
 }
 
 export default function GameChat(props: GameChatProps) {
+  // TODO remove chat client, convert to CreateComponentContext
   const messages = props.client.store(state => state.messages);
 
   const unreadMessages = messages.length - props.readMessages;

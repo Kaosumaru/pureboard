@@ -58,11 +58,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient, Seati
     return this.state().seats[index] == null;
   }
 
-  public async start(token: string | undefined): Promise<boolean> {
-    if (!token) {
-      this.disconnect();
-      return false;
-    }
+  public async start(token: string): Promise<boolean> {
     await this.client.connect();
     this.userInfo = await this.client.authorize(token);
     if (!this.userInfo) {
@@ -76,7 +72,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient, Seati
     this.client.disconnect();
   }
 
-  public async reconnect(token: string | undefined): Promise<void> {
+  public async reconnect(token: string): Promise<void> {
     await this.client.reconnect();
     await this.start(token);
     if (this.gameId) await this.join(this.gameId, this.gamePassword);

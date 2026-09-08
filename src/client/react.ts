@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, createContext, useContext } from 'react';
+import { useCallback, useEffect, useMemo, createContext, useContext, useState } from 'react';
 import { BaseComponentClient } from './baseComponentClient';
 import { ConnectionInterface, IDisposableClient, RoomInterface, SeatingInterface } from './interface';
 import { GameRoomClient } from './gameRoomClient';
@@ -55,4 +55,45 @@ export function useClient<T extends IDisposableClient, Args extends unknown[]>(t
     };
   }, [client]);
   return client;
+}
+
+interface UseGameRoomClientProps {
+  token: string;
+  onFailed: () => Promise<void>;
+  onSuccess: (client: GameRoomClient) => Promise<void>;
+}
+
+export function useGameRoomClient(props: UseGameRoomClientProps, deps?: React.DependencyList): GameRoomClient | undefined {
+  const [gameClient, setGameClient] = useState<GameRoomClient | undefined>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    const client = new GameRoomClient();
+
+    client
+      .start(props.token)
+      .then(async success => {
+        if (!success) {
+          await props.onFailed();
+          return;
+        }
+
+        if (cancelled) return;
+
+        setGameClient(client);
+        await props.onSuccess(client);
+      })
+      .catch(err => {
+        if (cancelled) {
+          return;
+        }
+        throw err;
+      });
+
+    return () => {
+      cancelled = true;
+      client?.disconnect();
+      setGameClient(undefined);
+    };
+  }, deps ?? []);
+  return gameClient;
 }
