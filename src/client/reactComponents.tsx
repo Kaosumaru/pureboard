@@ -1,18 +1,25 @@
-import { useContext, useMemo, useEffect, createContext, ReactNode, JSX, useLayoutEffect, useRef } from 'react';
+import { useContext, useMemo, useEffect, createContext, ReactNode, JSX } from 'react';
 import { BaseComponentClient } from './baseComponentClient';
 import { GameRoomContext } from './react';
 import { HiddenObjectsState, Store, StoreContainer } from '../shared';
 
 export interface ComponentContext<Data, Action, HiddenType = any> {
+  // store for the component's state
   store: Store<Data>;
+
+  // store for the component's hidden objects state
   hiddenObjectsStore: Store<HiddenObjectsState<HiddenType>>;
+
+  // function to send an action to the component
   action: (action: Action) => Promise<void>;
+
+  // function to register a handler for actions sent to the component
   onAction: (handler: (action: Action) => void) => void;
 }
 
 type StoreConstructor<Data, Action, HiddenType> = () => StoreContainer<Data, Action, HiddenType>;
 
-export function useComponentContext<Data, Action, HiddenType = any>(id: string, constructor: StoreConstructor<Data, Action, HiddenType>): ComponentContext<Data, Action, HiddenType> {
+function useComponentContext<Data, Action, HiddenType = any>(id: string, constructor: StoreConstructor<Data, Action, HiddenType>): ComponentContext<Data, Action, HiddenType> {
   const gameRoomClient = useContext(GameRoomContext);
   if (gameRoomClient === null) {
     throw new Error('useComponentContext must be used within a GameRoomProvider');
@@ -26,18 +33,12 @@ export function useComponentContext<Data, Action, HiddenType = any>(id: string, 
       client: client,
       hiddenObjectsStore: client.hiddenObjectsStore,
       onAction: (handler: (action: Action) => void) => {
-        const ref = useRef(handler);
-        // useLayoutEffect is used here to ensure that the ref is updated before any effects run, preventing stale closures in the event listener.
-        // TODO verify
-        useLayoutEffect(() => {
-          ref.current = handler;
-        });
         useEffect(() => {
-          const connection = client.onAfterAction.connect(e => ref.current(e));
+          const connection = client.onAfterAction.connect(handler);
           return () => {
             connection.disconnect();
           };
-        }, []);
+        }, [handler]);
       },
     };
   }, [gameRoomClient]);

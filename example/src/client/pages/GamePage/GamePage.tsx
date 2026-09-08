@@ -1,34 +1,34 @@
 import ConnectFour from './Connect4/ConnectFour';
 
 import './GamePage.css';
-import { GameRoomClient, GameRoomContext } from 'pureboard/client';
-import { JSX, useEffect, useState } from 'react';
+import { JSX } from 'react';
 import { Main } from '@client/utils/Main';
-import { Button } from '@mui/material';
+import { useSeatingContext } from 'pureboard/client/react';
 
 export interface GameProps {
-  client: GameRoomClient;
   userId: string;
 }
 
 interface GameWrapperProps {
-  client: GameRoomClient;
   userId: string;
   gameElement: () => JSX.Element;
 }
 
-function getReconnectDelay(tries: number) {
+/*function getReconnectDelay(tries: number) {
   if (tries < 2) return 1000;
   return 5000;
 }
+*/
 
 function GameWrapper(props: GameWrapperProps): JSX.Element {
+  // TODO client should manage autoreconnect
+  /*
   const [disconnected, setDisconnected] = useState(false);
   const [autoreconnecting, setAutoreconnecting] = useState(false);
   const [triesToConnect, setTriesToConnect] = useState(0);
 
   useEffect(() => {
-    // TODO client should have a store for connection state, so we don't have to manage it here?
+    
     const connection = props.client.onDisconnected(() => setDisconnected(true));
     const connection2 = props.client.onAuthorized(() => {
       setDisconnected(false);
@@ -40,7 +40,6 @@ function GameWrapper(props: GameWrapperProps): JSX.Element {
     };
   }, [props.client]);
 
-  // TODO this sounds like client logic, not UI logic. Maybe we should move it to the client?
   useEffect(() => {
     if (!disconnected) {
       setAutoreconnecting(false);
@@ -84,18 +83,17 @@ function GameWrapper(props: GameWrapperProps): JSX.Element {
       </Main>
     );
   }
-
+  */
   return (
     <Main>
-      <GameRoomContext.Provider value={props.client}>
-        <props.gameElement />
-      </GameRoomContext.Provider>
+      <props.gameElement />
     </Main>
   );
 }
 
 function GamePage(props: GameProps) {
-  const closed = props.client.store(state => state.closed);
+  const seating = useSeatingContext();
+  const closed = seating.store(state => state.closed);
   if (closed) {
     return (
       <Main>
@@ -104,7 +102,7 @@ function GamePage(props: GameProps) {
     );
   }
 
-  const gameId = props.client.store(state => state.id);
+  const gameId = seating.store(state => state.id);
   // TODO handle the case where the game ID is not yet available more gracefully
   if (gameId == -1) {
     return (

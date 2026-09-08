@@ -1,6 +1,6 @@
 import './GamePage.css';
 import { JSX, useState } from 'react';
-import { useGameRoomClient } from 'pureboard/client';
+import { GameRoomContext, useGameRoomClient } from 'pureboard/client';
 import { useParams } from 'react-router-dom';
 import GamePage from './GamePage';
 import { useLoginContext } from '../LoginPage/LoginPage';
@@ -44,7 +44,11 @@ function JoinGamePage(): JSX.Element {
     return <>Connecting...</>;
   }
 
-  return <GamePage client={gameClient} userId={context.userId} />;
+  return (
+    <GameRoomContext.Provider value={gameClient}>
+      <GamePage userId={context.userId} />;
+    </GameRoomContext.Provider>
+  );
 }
 
 export default JoinGamePage;

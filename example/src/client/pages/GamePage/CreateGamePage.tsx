@@ -2,7 +2,7 @@ import './GamePage.css';
 import { JSX } from 'react';
 import GamePage from './GamePage';
 import { useLoginContext } from '../LoginPage/LoginPage';
-import { useGameRoomClient } from 'pureboard/client';
+import { GameRoomContext, useGameRoomClient } from 'pureboard/client';
 
 function CreateGamePage(): JSX.Element {
   const context = useLoginContext();
@@ -26,7 +26,11 @@ function CreateGamePage(): JSX.Element {
     return <>Connecting...</>;
   }
 
-  return <GamePage client={gameClient} userId={context.userId} />;
+  return (
+    <GameRoomContext.Provider value={gameClient}>
+      <GamePage userId={context.userId} />;
+    </GameRoomContext.Provider>
+  );
 }
 
 export default CreateGamePage;
