@@ -1,9 +1,8 @@
-import { ChatClient } from 'pureboard/client';
+import { useSendChatMessage, useChat } from 'pureboard/client';
 import { Message } from 'pureboard/shared';
 import { ChatThread, ChatThreadEntry } from './ChatThread';
 
 export interface GameChatProps {
-  client: ChatClient;
   ownId: string;
 
   onSendMessage?: (message: string) => void;
@@ -22,8 +21,9 @@ function messagesToChatEntries(messages: Message[], props: GameChatProps): ChatT
 }
 
 export default function GameChat(props: GameChatProps) {
-  // TODO remove chat client, convert to CreateComponentContext
-  const messages = props.client.store(state => state.messages);
+  const { store: chatStore } = useChat();
+  const sendChatMessage = useSendChatMessage();
+  const messages = chatStore(state => state.messages);
 
   const unreadMessages = messages.length - props.readMessages;
 
@@ -36,7 +36,8 @@ export default function GameChat(props: GameChatProps) {
         if (props.onSendMessage) {
           props.onSendMessage(message);
         }
-        void props.client.sendMessage(message);
+
+        void sendChatMessage(message);
       }}
     />
   );

@@ -1,12 +1,13 @@
-import { useContext, useMemo, useEffect, createContext, ReactNode, JSX } from 'react';
+import { useContext, useMemo, useEffect, createContext, ReactNode, JSX, useLayoutEffect, useRef } from 'react';
 import { BaseComponentClient } from './baseComponentClient';
 import { GameRoomContext } from './react';
 import { HiddenObjectsState, Store, StoreContainer } from '../shared';
 
-interface ComponentContext<Data, Action, HiddenType = any> {
+export interface ComponentContext<Data, Action, HiddenType = any> {
   store: Store<Data>;
   hiddenObjectsStore: Store<HiddenObjectsState<HiddenType>>;
   action: (action: Action) => Promise<void>;
+  onAction: (handler: (action: Action) => void) => void;
 }
 
 type StoreConstructor<Data, Action, HiddenType> = () => StoreContainer<Data, Action, HiddenType>;
@@ -24,6 +25,20 @@ export function useComponentContext<Data, Action, HiddenType = any>(id: string, 
       action: client.sendAction.bind(client),
       client: client,
       hiddenObjectsStore: client.hiddenObjectsStore,
+      onAction: (handler: (action: Action) => void) => {
+        const ref = useRef(handler);
+        // useLayoutEffect is used here to ensure that the ref is updated before any effects run, preventing stale closures in the event listener.
+        // TODO verify
+        useLayoutEffect(() => {
+          ref.current = handler;
+        });
+        useEffect(() => {
+          const connection = client.onAfterAction.connect(e => ref.current(e));
+          return () => {
+            connection.disconnect();
+          };
+        }, []);
+      },
     };
   }, [gameRoomClient]);
 

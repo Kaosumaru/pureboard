@@ -1,3 +1,32 @@
+import { useCallback } from 'react';
+import { Action, StoreData, createGameStateStore } from '../../shared/stores/chatStore';
+import { useConnectionContext } from '../react';
+import { CreateComponentContext } from '../reactComponents';
+
+export const [ChatProvider, useChat] = CreateComponentContext<'chat', StoreData, Action>('chat', () => createGameStateStore());
+
+export function useSendChatMessage(): (message: string) => Promise<void> {
+  const connection = useConnectionContext();
+  const { action } = useChat();
+
+  return useCallback(
+    (message: string): Promise<void> => {
+      return action({
+        type: 'message',
+        message: {
+          user: {
+            id: connection.userInfo?.id ?? '',
+            name: connection.userInfo?.name ?? '',
+          },
+          message,
+        },
+      });
+    },
+    [action, connection]
+  );
+}
+
+/*
 import { Action, StoreData, createGameStateStore } from '../../shared/stores/chatStore';
 import { BaseComponentClient } from '../baseComponentClient';
 import { Signal } from 'typed-signals';
@@ -37,3 +66,4 @@ export class ChatClient extends BaseComponentClient<StoreData, Action> {
   onMessage = new Signal<(user: string, message: string) => void>();
   onExternalMessage = new Signal<(user: string, message: string) => void>();
 }
+*/

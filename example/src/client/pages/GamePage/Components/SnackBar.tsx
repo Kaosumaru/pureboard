@@ -1,16 +1,18 @@
+/*
 import { useEffect } from 'react';
 import React from 'react';
 import { IconButton, Snackbar, SnackbarCloseReason } from '@mui/material';
 import { Signal } from 'typed-signals';
 import CloseIcon from '@mui/icons-material/Close';
-
+*/
 export interface SnackBarProps {
   currentThread?: string;
-  onPrivMessage: Signal<(user: string, message: string) => void>;
   onClick?: (user: string) => void;
 }
 
-export const SnackBar = (props: SnackBarProps) => {
+export const SnackBar = (_props: SnackBarProps) => {
+  // TODO fix this
+  /*
   const [open, setOpen] = React.useState(false);
   const [user, setUser] = React.useState('');
   const [message, setMessage] = React.useState('');
@@ -62,4 +64,6 @@ export const SnackBar = (props: SnackBarProps) => {
       />
     </div>
   );
+*/
+  return <></>;
 };

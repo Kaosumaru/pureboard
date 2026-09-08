@@ -104,6 +104,16 @@ function GamePage(props: GameProps) {
     );
   }
 
+  const gameId = props.client.store(state => state.id);
+  // TODO handle the case where the game ID is not yet available more gracefully
+  if (gameId == -1) {
+    return (
+      <Main>
+        <h1>Connecting to game...</h1>
+      </Main>
+    );
+  }
+
   return <GameWrapper {...props} gameElement={ConnectFour} userId={props.userId} />;
 }
 

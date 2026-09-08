@@ -1,4 +1,4 @@
-import { ChatClient, useClient, useConnectionContext } from 'pureboard/client';
+import { useChat, useConnectionContext } from 'pureboard/client';
 import { Badge, Stack, Tab, Tabs } from '@mui/material';
 import MessageIcon from '@mui/icons-material/Message';
 import CasinoIcon from '@mui/icons-material/Casino';
@@ -16,9 +16,9 @@ export default function GameTabs(props: GameTabsProps): JSX.Element {
   const connection = useConnectionContext();
 
   const [tab, setTab] = useState<ETabs>(ETabs.Game);
-  const chatClient = useClient(ChatClient);
+  const { store: chatStore } = useChat();
 
-  const messages = chatClient.store(state => state.messages);
+  const messages = chatStore(state => state.messages);
   const [readMessages, setReadMessages] = useState(0);
   const unreadMessages = messages.length - readMessages;
 
@@ -29,14 +29,13 @@ export default function GameTabs(props: GameTabsProps): JSX.Element {
       {tab === ETabs.Chat && (
         <>
           <GameChat
-            client={chatClient}
             ownId={connection.userInfo?.id ?? ''}
             readMessages={readMessages}
             setReadMessages={setReadMessages}
           />
         </>
       )}
-      {tab !== ETabs.Chat && <SnackBarChat client={chatClient} onClick={() => setTab(ETabs.Chat)} />}
+      {tab !== ETabs.Chat && <SnackBarChat onClick={() => setTab(ETabs.Chat)} />}
       {props.createComponent(tab)}
     </>
   );
