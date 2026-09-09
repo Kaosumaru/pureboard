@@ -1,6 +1,6 @@
 import { Button, Stack } from '@mui/material';
 import { useLoginContext } from '@client/pages/LoginPage/LoginPage';
-import { useConnect4 } from './ConnectFourClient';
+import { useConnect4 } from './ConnectFourContext';
 import { useSeatingContext } from 'pureboard/client/react';
 
 export default function ConnectFourOptions() {

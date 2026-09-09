@@ -1,13 +1,12 @@
 import { Button } from '@mui/material';
-import ConnectFourSquare from './ConnectFourSquare';
-import { createContent } from './interface';
+import ConnectFourSquare, { createFieldToken } from './ConnectFourSquare';
 import './styles.css';
 import { ChatProvider, SeatingInterface, useSeatingContext } from 'pureboard/client';
 import { UserInfo } from 'pureboard/shared';
 import { motion } from 'motion/react';
 import ConnectFourOptions from './ConnectFourOptions';
 import GameTabs, { ETabs } from '../Components/GameTabs';
-import { ConnectFourProvider, useConnect4 } from './ConnectFourClient';
+import { ConnectFourProvider, useConnect4 } from './ConnectFourContext';
 
 function createPlayer(seat: UserInfo | null, index: number, seats: SeatingInterface) {
   if (seat) return <h2>{seat.name}</h2>;
@@ -32,11 +31,11 @@ function createPlayersRow(seats: (UserInfo | null)[], currentPlayer: number, sea
       <motion.span style={{ display: 'inline' }} initial={false} animate={{ opacity: currentPlayer == 0 ? 1 : 0.3 }}>
         {createPlayer(seats[0], 0, seat)}
         &nbsp;&nbsp;&nbsp;
-        {createContent(1)}
+        {createFieldToken(1)}
       </motion.span>
       <h1>VS</h1>
       <motion.span style={{ display: 'inline' }} initial={false} animate={{ opacity: currentPlayer == 1 ? 1 : 0.3 }}>
-        {createContent(2)}
+        {createFieldToken(2)}
         &nbsp;&nbsp;&nbsp;
         {createPlayer(seats[1], 1, seat)}
       </motion.span>
@@ -79,7 +78,7 @@ function ConnectFourGame() {
       {winner !== -1 ? (
         <div className="current-player-container">
           <h1>Winner</h1>
-          {createContent(winner + 1)}
+          {createFieldToken(winner + 1)}
         </div>
       ) : (
         createPlayersRow(seats, currentPlayer, seating)
