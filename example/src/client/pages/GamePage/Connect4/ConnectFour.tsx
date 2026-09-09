@@ -73,16 +73,19 @@ function ConnectFourGame() {
     });
   });
 
+  const hasWinner = winner !== -1;
+  const topRowComponent = hasWinner ? (
+    <div className="current-player-container">
+      <h1>Winner</h1>
+      {createFieldToken(winner + 1)}
+    </div>
+  ) : (
+    createPlayersRow(seats, currentPlayer, seating)
+  );
+
   return (
     <div className="main-Page-Container">
-      {winner !== -1 ? (
-        <div className="current-player-container">
-          <h1>Winner</h1>
-          {createFieldToken(winner + 1)}
-        </div>
-      ) : (
-        createPlayersRow(seats, currentPlayer, seating)
-      )}
+      {topRowComponent}
       <div className={'cf-Container'}>{fullBoard}</div>
     </div>
   );
