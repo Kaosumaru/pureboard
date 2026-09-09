@@ -46,7 +46,7 @@ function JoinGamePage(): JSX.Element {
 
   return (
     <GameRoomContext.Provider value={gameClient}>
-      <GamePage userId={context.userId} />;
+      <GamePage />;
     </GameRoomContext.Provider>
   );
 }
