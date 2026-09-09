@@ -4,8 +4,8 @@ import MessageIcon from '@mui/icons-material/Message';
 import CasinoIcon from '@mui/icons-material/Casino';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { JSX, useState } from 'react';
-import { SnackBarChat } from './SnackBarChat';
 import GameChat from './GameChat';
+import { SnackBar } from './SnackBar';
 
 export interface GameTabsProps {
   createComponent: (currentTab: ETabs) => JSX.Element;
@@ -35,7 +35,7 @@ export default function GameTabs(props: GameTabsProps): JSX.Element {
           />
         </>
       )}
-      {tab !== ETabs.Chat && <SnackBarChat onClick={() => setTab(ETabs.Chat)} />}
+      {tab !== ETabs.Chat && <SnackBar onClick={() => setTab(ETabs.Chat)} />}
       {props.createComponent(tab)}
     </>
   );
