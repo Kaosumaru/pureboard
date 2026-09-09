@@ -1,6 +1,6 @@
 import { Signal, SignalConnection } from 'typed-signals';
 import { UserInfo } from 'yawr';
-import { GameOptions, GameRoomState, Store } from '../shared';
+import { ConnectionState, GameOptions, GameRoomState, Store } from '../shared';
 
 export interface IClient {
   authorize(token: string): Promise<UserInfo | undefined>;
@@ -81,6 +81,11 @@ export interface ConnectionInterface {
   userInfo: UserInfo | undefined;
 
   /**
+   * The store that tracks the connection state (disconnected, autoreconnecting, tries to connect).
+   */
+  connectionStore: Store<ConnectionState>;
+
+  /**
    * Starts the client by connecting to the server and authorizing the user.
    * @param token - The authorization token for the user.
    * @returns A promise that resolves to `true` if the client started successfully, otherwise `false`.
@@ -96,7 +101,7 @@ export interface ConnectionInterface {
    * Reconnects the client to the server and reinitializes the game room state.
    * @param token - The authorization token for the user.
    */
-  reconnect(token: string | undefined): Promise<void>;
+  reconnect(): Promise<void>;
 }
 
 export interface RoomInterface {

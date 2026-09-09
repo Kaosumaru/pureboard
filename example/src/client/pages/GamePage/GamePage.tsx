@@ -2,8 +2,9 @@ import ConnectFour from './Connect4/ConnectFour';
 
 import './GamePage.css';
 import { JSX } from 'react';
+import { Button } from '@mui/material';
 import { Main } from '@client/utils/Main';
-import { useSeatingContext } from 'pureboard/client/react';
+import { useConnectionContext, useSeatingContext } from 'pureboard/client/react';
 
 export interface GameProps {
   userId: string;
@@ -14,52 +15,10 @@ interface GameWrapperProps {
   gameElement: () => JSX.Element;
 }
 
-/*function getReconnectDelay(tries: number) {
-  if (tries < 2) return 1000;
-  return 5000;
-}
-*/
-
 function GameWrapper(props: GameWrapperProps): JSX.Element {
-  // TODO client should manage autoreconnect
-  /*
-  const [disconnected, setDisconnected] = useState(false);
-  const [autoreconnecting, setAutoreconnecting] = useState(false);
-  const [triesToConnect, setTriesToConnect] = useState(0);
-
-  useEffect(() => {
-    
-    const connection = props.client.onDisconnected(() => setDisconnected(true));
-    const connection2 = props.client.onAuthorized(() => {
-      setDisconnected(false);
-      setAutoreconnecting(false);
-    });
-    return () => {
-      connection.disconnect();
-      connection2.disconnect();
-    };
-  }, [props.client]);
-
-  useEffect(() => {
-    if (!disconnected) {
-      setAutoreconnecting(false);
-      setTriesToConnect(0);
-      return;
-    }
-    if (triesToConnect > 5) {
-      setAutoreconnecting(false);
-      return;
-    }
-    setAutoreconnecting(true);
-    const timer = setTimeout(() => {
-      props.client.reconnect(props.userId).catch(err => {
-        console.log(err);
-        setDisconnected(true);
-        setTriesToConnect(triesToConnect + 1);
-      });
-    }, getReconnectDelay(triesToConnect));
-    return () => clearTimeout(timer);
-  }, [disconnected, triesToConnect]);
+  const connection = useConnectionContext();
+  const disconnected = connection.connectionStore(state => state.disconnected);
+  const autoreconnecting = connection.connectionStore(state => state.autoreconnecting);
 
   if (autoreconnecting) {
     return (
@@ -75,7 +34,7 @@ function GameWrapper(props: GameWrapperProps): JSX.Element {
         <h1>Disconnected</h1>
         <Button
           onClick={() => {
-            void props.client.reconnect(props.userId);
+            void connection.reconnect();
           }}
         >
           Reconnect
@@ -83,7 +42,7 @@ function GameWrapper(props: GameWrapperProps): JSX.Element {
       </Main>
     );
   }
-  */
+
   return (
     <Main>
       <props.gameElement />
