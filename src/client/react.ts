@@ -1,18 +1,17 @@
-import { useCallback, useEffect, useMemo, createContext, useContext, useState } from 'react';
+import { useEffect, useMemo, createContext, useContext, useState } from 'react';
 import { BaseComponentClient } from './baseComponentClient';
 import { ConnectionInterface, IDisposableClient, RoomInterface, SeatingInterface } from './interface';
 import { GameRoomClient } from './gameRoomClient';
 
 type InferAction<T> = T extends BaseComponentClient<any, infer Action, any> ? Action : never;
 
-export function useAfterAction<T extends BaseComponentClient<any, any, any>>(client: T, listener: (action: InferAction<T>) => void, deps: any[] = []): void {
-  const cachedListener = useCallback(listener, deps);
+export function useAfterAction<T extends BaseComponentClient<any, any, any>>(client: T, listener: (action: InferAction<T>) => void): void {
   useEffect(() => {
-    const connection = client.onAfterAction.connect(cachedListener);
+    const connection = client.onAfterAction.connect(listener);
     return () => {
       connection.disconnect();
     };
-  }, [client, cachedListener]);
+  }, [client, listener]);
 }
 
 export const GameRoomContext = createContext<GameRoomClient | null>(null);
@@ -47,13 +46,13 @@ export function useClient<T extends IDisposableClient, Args extends unknown[]>(t
     throw new Error('useClient must be used within a GameRoomProvider');
   }
 
-  const client = useMemo(() => new type(gameRoomClient, ...args), [gameRoomClient, ...args]);
+  const client = useMemo(() => new type(gameRoomClient, ...args), [gameRoomClient, type, args]);
   useEffect(() => {
     void client.initialize();
     return () => {
       client.deinitialize();
     };
-  }, [client]);
+  }, [client, args, type]);
   return client;
 }
 
@@ -94,6 +93,8 @@ export function useGameRoomClient(props: UseGameRoomClientProps, deps?: React.De
       client?.disconnect();
       setGameClient(undefined);
     };
-  }, deps ?? []);
+    // TODO think if we want to remove that
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props, ...[deps ?? []]]);
   return gameClient;
 }

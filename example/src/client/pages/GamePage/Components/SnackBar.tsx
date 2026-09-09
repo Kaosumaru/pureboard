@@ -15,7 +15,7 @@ export const SnackBar = (props: SnackBarProps) => {
 
   const currentThread = props.currentThread;
 
-  const { onAction } = useChat();
+  const { useOnAction } = useChat();
 
   const callback = useCallback(
     (action: MessageAction) => {
@@ -29,7 +29,7 @@ export const SnackBar = (props: SnackBarProps) => {
     [currentThread]
   );
 
-  onAction(callback);
+  useOnAction(callback);
 
   const handleClose = (_: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
     if (reason === 'clickaway') {

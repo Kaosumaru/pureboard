@@ -14,7 +14,7 @@ export interface ComponentContext<Data, Action, HiddenType = any> {
   action: (action: Action) => Promise<void>;
 
   // function to register a handler for actions sent to the component
-  onAction: (handler: (action: Action) => void) => void;
+  useOnAction: (handler: (action: Action) => void) => void;
 }
 
 type StoreConstructor<Data, Action, HiddenType> = () => StoreContainer<Data, Action, HiddenType>;
@@ -32,7 +32,7 @@ function useComponentContext<Data, Action, HiddenType = any>(id: string, constru
       action: client.sendAction.bind(client),
       client: client,
       hiddenObjectsStore: client.hiddenObjectsStore,
-      onAction: (handler: (action: Action) => void) => {
+      useOnAction: (handler: (action: Action) => void) => {
         useEffect(() => {
           const connection = client.onAfterAction.connect(handler);
           return () => {
@@ -41,7 +41,7 @@ function useComponentContext<Data, Action, HiddenType = any>(id: string, constru
         }, [handler]);
       },
     };
-  }, [gameRoomClient]);
+  }, [gameRoomClient, constructor, id]);
 
   useEffect(() => {
     void context.client.initialize();
