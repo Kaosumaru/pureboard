@@ -127,7 +127,6 @@ export function useGameRoomClient(props: UseGameRoomClientProps, deps?: React.De
       client?.disconnect();
       setGameClient(undefined);
     };
-    // TODO think if we want to remove that
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps ?? []);
   return gameClient;
