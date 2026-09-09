@@ -1,20 +1,21 @@
-# TODO
+# Plan
 
-## Architecture
+## Phase 0: Remove TODO from code
 
-- rename and clarify API
+## Phase 1: Improve packaging
 
-## Docs
+- Narrow the published `files` list so the npm package only includes runtime artifacts.
+- Update the supported Node version to match the current toolchain and test matrix.
 
-- fill examples with example of how to implement a simple game
+## Phase 2: Improve documentation
 
-## GameOptions
+- Rewrite the README quickstart so it only uses public top-level exports.
+- Refresh the usage guide to show a minimal end-to-end game setup.
+- Clean up README
+- Would be great to show a tutorial with game implementation
 
-Due to refactor of way in which we are handling room creation, docs, and sample game needs to be fixed.
+## Phase 3: Backlog ideas
 
-## Other
-
-- add a way to add a bot player (maybe a bot component would be a good pick? Then we could save type of bot assigned to each seat)
-- add easy way for an generic "undo" (save a patch between old state and new state?)
-- add info, client code, and example of 'effect-based' game
-
+- Add bot-player support as a dedicated component or plugin.
+- Add a generic undo mechanism based on state patches or action history.
+- Add an effect-driven game example to demonstrate complex turn-based interactions.
