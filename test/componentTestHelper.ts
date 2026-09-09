@@ -19,7 +19,7 @@ function createComponentValidation(ctx: Context, _gameId: number): UserPermissio
 export interface ComponentData<ComponentClient extends IDisposableClient> {
   registerServerComponents: (server: TestServer) => void;
   componentConstructor: ComponentConstructor;
-  clientType: { new (client: IGameRoomClient): ComponentClient };
+  clientConstructor: (client: IGameRoomClient) => ComponentClient;
 }
 
 export async function componentTestHelper<ComponentClient extends IDisposableClient>(
@@ -41,7 +41,11 @@ export async function componentTestHelper<ComponentClient extends IDisposableCli
   const gameId = game.data.id;
   server.addToGroup(client, `room/${gameId}`);
 
-  const componentClient = new data.clientType({ client, gameId });
+  const gameRoomClient: IGameRoomClient = {
+    gameId,
+    client,
+  };
+  const componentClient = data.clientConstructor(gameRoomClient);
   await componentClient.initialize();
 
   await testCallback(componentClient);

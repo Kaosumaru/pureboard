@@ -1,19 +1,17 @@
-// TODO
-/*
-import { ChatClient } from '../src/client/clients/chatClient';
+import { BaseComponentClient } from '../src/client';
 import { createChat, createChatWithCallback, registerChat } from '../src/server/components/chat';
 import { ComponentConstructor } from '../src/server/rooms';
-import { Message } from '../src/shared/stores/chatStore';
+import { StoreData, Action, Message, createGameStateStore } from '../src/shared/stores/chatStore';
 import { componentTestHelper } from './componentTestHelper';
 
-function testChat(componentConstructor: ComponentConstructor, testCallback: (chatClient: ChatClient) => Promise<void>) {
+function testChat(componentConstructor: ComponentConstructor, testCallback: (chatClient: BaseComponentClient<StoreData, Action>) => Promise<void>) {
   return componentTestHelper(
     {
       registerServerComponents: server => {
         registerChat(server);
       },
       componentConstructor: componentConstructor,
-      clientType: ChatClient,
+      clientConstructor: client => new BaseComponentClient<StoreData, Action>(createGameStateStore(), 'chat', client),
     },
     testCallback
   );
@@ -22,9 +20,19 @@ function testChat(componentConstructor: ComponentConstructor, testCallback: (cha
 describe('chat client', () => {
   it('client should be able to send a message', async () => {
     await testChat(createChat(), async chatClient => {
-      await chatClient.sendMessage('test message');
-
       const info = chatClient.client.getUserInfo();
+
+      await chatClient.sendAction({
+        type: 'message',
+        message: {
+          user: {
+            id: info?.id ?? '',
+            name: info?.name ?? '',
+          },
+          message: 'test message',
+        },
+      });
+
       const expectedMessage: Message = {
         user: {
           id: info?.id ?? '',
@@ -47,9 +55,18 @@ describe('chat client', () => {
         };
       }),
       async chatClient => {
-        await chatClient.sendMessage('test message');
-
         const info = chatClient.client.getUserInfo();
+        await chatClient.sendAction({
+          type: 'message',
+          message: {
+            user: {
+              id: info?.id ?? '',
+              name: info?.name ?? '',
+            },
+            message: 'test message',
+          },
+        });
+
         const expectedMessage: Message = {
           user: {
             id: info?.id ?? '',
@@ -82,5 +99,3 @@ describe('chat client', () => {
     });
   });
 });
-
-*/
