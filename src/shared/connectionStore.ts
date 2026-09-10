@@ -19,13 +19,13 @@ export interface ConnectionState extends ConnectionData {
 export function createConnectionStore(): Store<ConnectionState> {
   const useConnectionStore = create<ConnectionState>()(
     devtools(set => ({
-      disconnected: false,
+      disconnected: true,
       autoreconnecting: false,
       triesToConnect: 0,
       setDisconnected: (disconnected: boolean) => set(_ => ({ disconnected })),
       setAutoreconnecting: (autoreconnecting: boolean) => set(_ => ({ autoreconnecting })),
       setTriesToConnect: (triesToConnect: number) => set(_ => ({ triesToConnect })),
-      reset: () => set(_ => ({ disconnected: false, autoreconnecting: false, triesToConnect: 0 })),
+      reset: () => set(_ => ({ disconnected: true, autoreconnecting: false, triesToConnect: 0 })),
     }))
   );
   return useConnectionStore;

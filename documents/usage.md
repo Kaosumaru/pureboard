@@ -121,31 +121,15 @@ await roomClient.takeAvailableSeat();
 // await roomClient.join(gameId, password);
 ```
 
-## 4) Create game client
+## 4) Declare game context
 
-Extend `BaseGameClient` and wrap common actions.
+Get context provider and hook
 
 ```ts
-import { BaseGameClient, GameRoomClient } from 'pureboard/client';
-import { Action, StoreData, createGameStateStore } from '@shared/stores/connectFourStore';
-
-export class ConnectFourClient extends BaseGameClient<StoreData, Action> {
-  constructor(gameRoomClient: GameRoomClient) {
-    super(createGameStateStore(), 'connect4', gameRoomClient);
-  }
-
-  public async makeMove(column: number) {
-    await this.sendAction({ type: 'move', column });
-  }
-
-  public async surrender(player: number) {
-    await this.sendAction({ type: 'surrender', player });
-  }
-
-  public async newGame() {
-    await this.sendAction({ type: 'newGame' });
-  }
-}
+export const [ConnectFourProvider, useConnect4] = CreateComponentContext<'connect4', StoreData, Action>(
+  'connect4',
+  () => createGameStateStore()
+);
 ```
 
 ## 5) Use in React
@@ -155,23 +139,31 @@ Use `useClient` to create and initialize game/component clients.
 ```tsx
 import { useClient, GameRoomClient } from 'pureboard/client';
 import { ConnectFourClient } from './ConnectFourClient';
+import { ConnectFourProvider, useConnect4 } from './ConnectFourContext';
 
-export interface GameProps {
-  gameRoomClient: GameRoomClient;
+export default function ConnectFour() {
+  // wrap game rendering logic in ConnectFourProvider - this will allow you to use useConnect4 inside
+  return (
+    <ConnectFourProvider>
+      <ConnectFourGame />
+    </ConnectFourProvider>
+  );
 }
 
-export default function ConnectFour(props: GameProps) {
-  const client = useClient(ConnectFourClient, props.gameRoomClient);
+export default function ConnectFour() {
+  const { store, action } = useConnect4();
 
-  const board = client.store(state => state.board);
-  const currentPlayer = client.store(state => state.currentPlayer);
-  const messages = chatClient.store(state => state.messages);
+  const board = store(state => state.board);
+  const currentPlayer = store(state => state.currentPlayer);
+  const messages = store(state => state.messages);
 
   return (
     <div>
       <div>Current player: {currentPlayer}</div>
       <div>Messages: {messages.length}</div>
-      <button onClick={() => void client.makeMove(0)}>Play column 0</button>
+      <button onClick={() => void action({ type: 'move', column: 0 })}>
+        Play on column 0
+      </button>
       <pre>{JSON.stringify(board)}</pre>
     </div>
   );
