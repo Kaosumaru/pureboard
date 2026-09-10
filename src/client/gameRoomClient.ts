@@ -107,6 +107,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient, Seati
       this.disconnect();
       return false;
     }
+    this.connectionState().setDisconnected(false);
     return true;
   }
 

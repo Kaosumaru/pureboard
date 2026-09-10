@@ -105,12 +105,12 @@ export function useGameRoomClient(props: UseGameRoomClientProps, deps?: React.De
     client
       .start(props.token)
       .then(async success => {
+        if (cancelled) return;
+
         if (!success) {
           await props.onFailed();
           return;
         }
-
-        if (cancelled) return;
 
         setGameClient(client);
         await props.onSuccess(client);
