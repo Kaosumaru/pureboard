@@ -96,7 +96,12 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient, Seati
 
   public async start(token: string): Promise<boolean> {
     this.lastToken = token;
-    await this.client.connect();
+    try {
+      await this.client.connect();
+    } catch (err) {
+      this.connectionState().setDisconnected(true);
+      return false;
+    }
     this.userInfo = await this.client.authorize(token);
     if (!this.userInfo) {
       this.disconnect();
@@ -200,6 +205,7 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient, Seati
     this.disconnectedIntentionally = false;
     this.clearReconnectTimer();
     this.connectionState().reset();
+    this.connectionState().setDisconnected(false);
   }
 
   private scheduleReconnect(): void {
