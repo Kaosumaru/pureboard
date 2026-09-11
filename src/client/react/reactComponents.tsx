@@ -1,7 +1,7 @@
 import { useContext, useMemo, useEffect, createContext, ReactNode, JSX } from 'react';
-import { BaseComponentClient } from './baseComponentClient';
-import { GameRoomContext } from './react';
-import { HiddenObjectsState, Store, StoreContainer } from '../shared';
+import { BaseComponentClient } from '../baseComponentClient';
+import { HiddenObjectsState, Store, StoreContainer } from '../../shared';
+import { GameRoomContext } from './useClient';
 
 export interface ComponentContext<Data, Action, HiddenType = any> {
   // store for the component's state

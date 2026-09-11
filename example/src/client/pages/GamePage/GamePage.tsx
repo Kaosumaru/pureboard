@@ -3,7 +3,7 @@ import ConnectFour from './Connect4/ConnectFour';
 import './GamePage.css';
 import { Button } from '@mui/material';
 import { Main } from '@client/utils/Main';
-import { RoomConnectionState, useConnectionContext, useRoomConnectionState } from 'pureboard/client/react';
+import { RoomConnectionState, useConnectionContext, useRoomConnectionState } from 'pureboard/client';
 
 function GamePage() {
   const connectionState = useRoomConnectionState();

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Action, StoreData, createGameStateStore } from '../../shared/stores/chatStore';
-import { useConnectionContext } from '../react';
-import { CreateComponentContext } from '../reactComponents';
+import { CreateComponentContext } from '../react/reactComponents';
+import { useConnectionContext } from '../react/context';
 
 export const [ChatProvider, useChat] = CreateComponentContext<'chat', StoreData, Action>('chat', () => createGameStateStore());
 
