@@ -1,9 +1,10 @@
 import './GamePage.css';
 import { JSX, useState } from 'react';
-import { JoinGameRoomClient } from 'pureboard/client';
+import { GameRoom, JoinGameRoomClient } from 'pureboard/client';
 import { useParams } from 'react-router-dom';
-import GamePage from './GamePage';
+import { ConnectionHelpers } from './ConnectionHelpers';
 import { useLoginContext } from '../LoginPage/LoginPage';
+import ConnectFour from './Connect4/ConnectFour';
 
 function JoinGamePage(): JSX.Element {
   const context = useLoginContext();
@@ -29,7 +30,10 @@ function JoinGamePage(): JSX.Element {
         return Promise.resolve();
       }}
     >
-      <GamePage />;
+      <ConnectionHelpers />;
+      <GameRoom.Connected>
+        <ConnectFour />
+      </GameRoom.Connected>
     </JoinGameRoomClient>
   );
 }

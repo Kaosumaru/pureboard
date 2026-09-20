@@ -10,5 +10,6 @@ export * from './react/reactComponents';
 export * from './react/useClient';
 export * from './react/createGameRoom';
 export * from './react/joinGameRoom';
+export * from './react/gameRoom';
 export * from './clients/chatClient';
 export * from './clients/timerClient';

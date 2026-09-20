@@ -1,6 +1,6 @@
 # Usage
 
-This page follows the Connect4 example in `example/src` and reflects the current API names.
+This page follows the Connect4 example in `example/src`, building a working simple multiplayer Connect4 game.
 
 ## 1) Create a game store
 
@@ -105,20 +105,52 @@ server.on('upgrade', (request, socket, head) => {
 
 ## 3) Connect room client (create/join room)
 
-`GameRoomClient` manages room lifecycle and auth.
+Component `CreateGameRoomClient` creates a new game room
 
-```ts
-import { GameRoomClient } from 'pureboard/client';
+```tsx
+function CreateGamePage(): JSX.Element {
 
-const roomClient = new GameRoomClient();
-const ok = await roomClient.start(userToken);
-if (!ok) throw new Error('Authorization failed');
 
-const [gameId, password] = await roomClient.createRoom('connect4', { players: 2 });
-await roomClient.takeAvailableSeat();
+  return (
+    <CreateGameRoomClient
+      token={/*player session token*/}
+      gameId="connect4"
+      options={{ players: 2 }}
+      onCreated={(id, password) => {
+        // replace current url, so refreshing the page will rejoin the game,
+        // not create new one
+        const url = password ? `/joinGame/${id}/${password}` : `/game/${id}`;
+        window.history.replaceState(null, 'Game', url);
+        return Promise.resolve();
+      }}
+      onFailed={err => {
+        // logout or show error to player
+      }}
+    >
+      <GameRoom.Connected>
+        <ConnectFour />
+      </GameRoom.Connected>
+    </CreateGameRoomClient>
+  );
+}
+```
 
-// or join existing room:
-// await roomClient.join(gameId, password);
+Component `CreateGameRoomClient` joins a game room
+
+```tsx
+    <JoinGameRoomClient
+      token={context.userId}
+      roomId={roomId}
+      password={params.password}
+      onFailed={err => {
+        // show error to player
+      }}
+    >
+      <GameRoom.Connected>
+        <ConnectFour />
+      </GameRoom.Connected>
+    </JoinGameRoomClient>
+  );
 ```
 
 ## 4) Declare game context
