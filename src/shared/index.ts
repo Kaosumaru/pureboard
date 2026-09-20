@@ -4,3 +4,4 @@ export * from './hiddenObjectsStore';
 export * from './interface';
 export * from './internalInterface';
 export * from './store';
+export * from './utHelper';
