@@ -1,10 +1,8 @@
 import express from 'express';
 import ViteExpress from 'vite-express';
-import { createServer } from 'pureboard/server/server';
-import { UserInfo } from 'pureboard/shared/gameRoomStore';
+import { createServer, createChat, registerGame } from 'pureboard/server';
+import { UserInfo } from 'pureboard/shared';
 import { createGameStateStore } from '@shared/stores/connectFourStore';
-import { createChat } from 'pureboard/server/components/chat';
-import { registerGame } from 'pureboard/server/componentContainer';
 
 try {
   // create express server
@@ -23,6 +21,7 @@ try {
   // register game type with chat component
   registerGame(gameWebsocketServer, 'connect4', createGameStateStore, {
     components: [createChat()],
+    initialAction: () => ({ type: 'newGame' as const }),
   });
 
   // register dummy authorization method

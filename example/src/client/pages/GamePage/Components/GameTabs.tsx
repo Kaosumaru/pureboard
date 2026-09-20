@@ -1,27 +1,24 @@
-import { GameRoomClient } from 'pureboard/client/gameRoomClient';
+import { useChat, useConnectionContext } from 'pureboard/client';
 import { Badge, Stack, Tab, Tabs } from '@mui/material';
 import MessageIcon from '@mui/icons-material/Message';
 import CasinoIcon from '@mui/icons-material/Casino';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { JSX, useState } from 'react';
-import { ChatClient } from 'pureboard/client/clients/chatClient';
-import { SnackBarChat } from './SnackBarChat';
 import GameChat from './GameChat';
-import { useClient } from 'pureboard/client/react';
-import { IBaseComponentClient } from 'pureboard/client/interface';
+import { SnackBar } from './SnackBar';
 
 export interface GameTabsProps {
-  gameClient: IBaseComponentClient;
-  gameRoomClient: GameRoomClient;
   createComponent: (currentTab: ETabs) => JSX.Element;
   padding?: boolean;
 }
 
 export default function GameTabs(props: GameTabsProps): JSX.Element {
-  const [tab, setTab] = useState<ETabs>(ETabs.Game);
-  const chatClient = useClient(ChatClient, props.gameRoomClient);
+  const connection = useConnectionContext();
 
-  const messages = chatClient.store(state => state.messages);
+  const [tab, setTab] = useState<ETabs>(ETabs.Game);
+  const { store: chatStore } = useChat();
+
+  const messages = chatStore(state => state.messages);
   const [readMessages, setReadMessages] = useState(0);
   const unreadMessages = messages.length - readMessages;
 
@@ -32,14 +29,13 @@ export default function GameTabs(props: GameTabsProps): JSX.Element {
       {tab === ETabs.Chat && (
         <>
           <GameChat
-            client={chatClient}
-            ownId={props.gameRoomClient.userInfo?.id ?? ''}
+            ownId={connection.userInfo?.id ?? ''}
             readMessages={readMessages}
             setReadMessages={setReadMessages}
           />
         </>
       )}
-      {tab !== ETabs.Chat && <SnackBarChat client={chatClient} onClick={() => setTab(ETabs.Chat)} />}
+      {tab !== ETabs.Chat && <SnackBar onClick={() => setTab(ETabs.Chat)} />}
       {props.createComponent(tab)}
     </>
   );

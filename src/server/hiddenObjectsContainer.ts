@@ -1,4 +1,4 @@
-import { CurrentPlayerValidation, IHiddenObjects } from '../shared/interface';
+import { UserPermissions, IHiddenObjects } from '../shared/interface';
 import { IHiddenObjectWrapper, IHiddenObjectWrapperMap } from '../shared/internalInterface';
 
 export class HiddenObjectContainer<Type> implements IHiddenObjects<Type> {
@@ -68,11 +68,11 @@ export class HiddenObjectContainer<Type> implements IHiddenObjects<Type> {
     });
   }
 
-  getState(validation: CurrentPlayerValidation): IHiddenObjectWrapperMap<Type> {
+  getState(validation: UserPermissions): IHiddenObjectWrapperMap<Type> {
     return Object.fromEntries([...this.hiddenObjects.entries()].filter(([_, object]) => isVisible(object, validation)));
   }
 
-  getStateDelta(validation: CurrentPlayerValidation): IHiddenObjectWrapperMap<Type> {
+  getStateDelta(validation: UserPermissions): IHiddenObjectWrapperMap<Type> {
     return Object.fromEntries([...this.queuedHiddenObjects.entries()].map(([id, object]) => (isVisible(object, validation) ? [id, object] : [id, null])));
   }
 
@@ -102,7 +102,7 @@ export class HiddenObjectContainer<Type> implements IHiddenObjects<Type> {
   }
 }
 
-function isVisible<Type>(obj: IHiddenObjectWrapper<Type>, validation: CurrentPlayerValidation): boolean {
+function isVisible<Type>(obj: IHiddenObjectWrapper<Type>, validation: UserPermissions): boolean {
   return obj.visibleOnlyTo === undefined || validation.canMoveAsPlayer(obj.visibleOnlyTo);
 }
 

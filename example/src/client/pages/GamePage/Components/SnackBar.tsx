@@ -1,41 +1,31 @@
-import { useEffect } from 'react';
-import React from 'react';
+import { useChat } from 'pureboard/client/clients/chatClient';
+import { MessageAction } from 'pureboard/shared/stores/chatStore';
+import { useCallback, useState } from 'react';
 import { IconButton, Snackbar, SnackbarCloseReason } from '@mui/material';
-import { Signal } from 'typed-signals';
 import CloseIcon from '@mui/icons-material/Close';
 
 export interface SnackBarProps {
-  currentThread?: string;
-  onPrivMessage: Signal<(user: string, message: string) => void>;
-  onClick?: (user: string) => void;
+  onClick?: () => void;
 }
 
 export const SnackBar = (props: SnackBarProps) => {
-  const [open, setOpen] = React.useState(false);
-  const [user, setUser] = React.useState('');
-  const [message, setMessage] = React.useState('');
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const onPrivMessage = props.onPrivMessage;
-  const currentThread = props.currentThread;
-
-  useEffect(() => {
-    const connection = onPrivMessage.connect((user, message) => {
-      if (user === currentThread) return;
+  const callback = useCallback((action: MessageAction) => {
+    if (action.type === 'message') {
       setOpen(true);
-      setUser(user);
-      setMessage(`${user}: ${message}`);
-    });
+      setMessage(`${action.message.user.name}: ${action.message.message}`);
+    }
+  }, []);
 
-    return () => {
-      connection.disconnect();
-    };
-  }, [onPrivMessage, currentThread]);
+  const { useOnAction } = useChat();
+  useOnAction(callback);
 
   const handleClose = (_: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
     if (reason === 'clickaway') {
       return;
     }
-
     setOpen(false);
   };
 
@@ -55,7 +45,7 @@ export const SnackBar = (props: SnackBarProps) => {
         onClose={handleClose}
         message={message}
         onClick={() => {
-          if (props.onClick) props.onClick(user);
+          if (props.onClick) props.onClick();
           setOpen(false);
         }}
         action={action}

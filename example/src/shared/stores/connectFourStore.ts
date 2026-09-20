@@ -1,11 +1,14 @@
-import { Context, CurrentPlayerValidation, StoreContainer } from 'pureboard/shared/interface';
-import { StandardGameAction } from 'pureboard/shared/standardActions';
-import { createComponentStore } from 'pureboard/shared/store';
+import { Context, StoreContainer, UserPermissions } from 'pureboard/shared';
+import { createComponentStore } from 'pureboard/shared';
 
 export enum FieldType {
   Empty,
   X,
   O,
+}
+
+export interface NewGameAction {
+  type: 'newGame';
 }
 
 export interface MoveAction {
@@ -18,7 +21,7 @@ export interface SurrenderAction {
   player: number;
 }
 
-export type Action = MoveAction | SurrenderAction;
+export type Action = MoveAction | SurrenderAction | NewGameAction;
 
 export interface StoreData {
   currentPlayer: number;
@@ -59,11 +62,11 @@ function isMoveVictorious(data: StoreData, row: number, column: number): boolean
   return false;
 }
 
-function makeMove(playerValidation: CurrentPlayerValidation, data: StoreData, column: number): StoreData {
+function makeMove(userPermissions: UserPermissions, data: StoreData, column: number): StoreData {
   const { board, currentPlayer, victoriousPlayer } = data;
   if (victoriousPlayer !== -1) throw new Error('Game is already over');
   if (column < 0 || column >= board[0].length) throw new Error('Invalid column');
-  if (!playerValidation.canMoveAsPlayer(currentPlayer)) throw new Error('Not your turn');
+  if (!userPermissions.canMoveAsPlayer(currentPlayer)) throw new Error('Not your turn');
 
   for (let i = board.length - 1; i >= 0; --i) {
     if (board[i][column] === FieldType.Empty) {
@@ -98,11 +101,7 @@ export function createGameStateStore(): StoreContainer<StoreData, Action> {
   );
 }
 
-function makeAction(
-  ctx: Context,
-  store: StoreData,
-  action: Action | StandardGameAction
-): StoreData | Partial<StoreData> {
+function makeAction(ctx: Context, store: StoreData, action: Action): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'move':
       return makeMove(ctx.playerValidation, store, action.column);
@@ -110,6 +109,9 @@ function makeAction(
       if (!ctx.playerValidation.canMoveAsPlayer(action.player)) throw new Error('Not your player');
       return { ...store, victoriousPlayer: 1 - action.player };
     case 'newGame': {
+      if (store.victoriousPlayer === -1 && !ctx.playerValidation.isServerOriginating())
+        throw new Error('Game not over, cannot start a new game');
+
       const newStore: StoreData = {
         board: create2DArray<FieldType>(6, 7, FieldType.Empty),
         currentPlayer: ctx.random.int(2),

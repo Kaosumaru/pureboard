@@ -1,122 +1,204 @@
 # Usage
 
-## Create State
+This page follows the Connect4 example in `example/src`, building a working simple multiplayer Connect4 game.
 
-State is used in both server and client.
+## 1) Create a game store
+
+Define your `Action` union, `StoreData`, and reducer. Then expose a `createGameStateStore` function that returns `StoreContainer`.
 
 ```ts
-export interface SomeAction {
-  type: 'someAction';
-  ... // other properties
+import { Context, StoreContainer, UserPermissions, createComponentStore } from 'pureboard/shared';
+
+export interface NewGameAction {
+  type: 'newGame';
 }
 
-export interface SomeOtherAction {
-  type: 'someOtherAction';
-  ... // other properties
+export interface MoveAction {
+  type: 'move';
+  column: number;
 }
 
-export type Action = SomeAction | SomeOtherAction;
+export interface SurrenderAction {
+  type: 'surrender';
+  player: number;
+}
+
+export type Action = MoveAction | SurrenderAction | NewGameAction;
 
 export interface StoreData {
-  yourGameProperty: string;
-  ... // state interface
+  currentPlayer: number;
+  victoriousPlayer: number;
+  board: FieldType[][];
+  lastMoveRow: number;
+  lastMoveColumn: number;
 }
 
 
-export function createGameStateStore(): StoreContainer<StoreData, Action | StandardGameAction> {
+function makeAction(ctx: Context, store: StoreData, action: Action): StoreData | Partial<StoreData> {
+  switch (action.type) {
+    case 'surrender':
+      if (!ctx.playerValidation.canMoveAsPlayer(action.player)) throw new Error('Not your player');
+      return { ...store, victoriousPlayer: 1 - action.player };
+    case 'newGame':
+      return {
+        ...store,
+        board: [],
+        currentPlayer: ctx.random.int(2),
+        victoriousPlayer: -1,
+        lastMoveRow: -1,
+        lastMoveColumn: -1,
+      };
+    case 'move':
+      // implement move action here
+  }
+}
+
+export function createGameStateStore(): StoreContainer<StoreData, Action> {
   return createComponentStore(
     {
-      ... // initial store state
+      board: [],
+      currentPlayer: 0,
+      lastMoveRow: -1,
+      lastMoveColumn: -1,
+      victoriousPlayer: -1,
     },
-    reducer
+    makeAction
   );
-}
-
-function reducer(
-  ctx: Context,
-  store: StoreData,
-  action: Action | StandardGameAction,
-): StoreData | Partial<StoreData> {
-   /*
-   * Return new game state after applying an action
-   * Bear in mind that this function should be pure - always give same result for an Action
-   * Randomness can be achieved by ctx.random
-   */
-   ...
 }
 ```
 
-## Create server
+## 2) Register the game on server
+
+Create a websocket server with `createServer`, then call `registerGame`.
 
 ```ts
-// import createGameStateStore from your store
-const server = ...; // create express http eserver
+import express from 'express';
+import ViteExpress from 'vite-express';
+import { createServer, createChat, registerGame } from 'pureboard/server';
+import { createGameStateStore } from '@shared/stores/connectFourStore';
 
-//create websocket server
+const app = express();
+const server = ViteExpress.listen(app, 3000);
 const gameWebsocketServer = createServer();
 
-// register game type with chat component
-registerGame(gameWebsocketServer, <unique-id>, createGameStateStore, {
-   components: [createChat()], // add chat to this game
+// register a game type with an id
+registerGame(gameWebsocketServer, 'connect4', createGameStateStore, {
+  // attach optional components
+  components: [createChat()],
+  // provide initial action if needed
+  initialAction: () => ({ type: 'newGame' as const }),
 });
 
-// register authorization method
-gameWebsocketServer.registerJWTAuth( ... );
+// implement real authentication here
+gameWebsocketServer.registerJWTAuth(async token => ({
+  id: token,
+  name: token,
+  isAdmin: false,
+}));
 
-// upgrade all /ws requests to websocket connections to gameWebsocketServer
 server.on('upgrade', (request, socket, head) => {
-   if (request.url === '/ws') {
-   gameWebsocketServer.handleUpgrade(request, socket, head);
-   }
+  if (request.url === '/ws') {
+    gameWebsocketServer.handleUpgrade(request, socket, head);
+  }
 });
 ```
 
-## Create game client
+## 3) Connect room client (create/join room)
 
-```ts
-// import createGameStateStore, StoreData and Action from your store
-export class GameClient extends BaseGameClient<StoreData, Action> {
-    constructor(gameRoomClient: GameRoomClient) {
-        super(createGameStateStore(), <unique-id>, gameRoomClient);
-    }
+Component `CreateGameRoomClient` creates a new game room
 
-    // optionally create wrappers for sending an action
-    public async someAction(...) {
-        await this.sendAction({ type: 'someAction', ... });
-    }
-}
-```
+```tsx
+function CreateGamePage(): JSX.Element {
 
-## Use game client in react components
-
-```ts
-export interface GameProps {
-  gameRoomClient: GameRoomClient;
-}
-
-export default function GameComponent(props: GameProps) {
-  // forward connected GameRoomClient as a prop to this component
-
-  // use client for your game
-  const client = useClient(GameClient, props.gameRoomClient);
-  // use underlying zustand store as you wish to render your game
-  const yourGameProperty = client.store((state) => state.yourGameProperty);
-
-  // and you can use clients for attached components
-  const chatClient = useClient(ChatClient, props.gameRoomClient);
-  const messages = chatClient.store((state) => state.messages);
-
-  const handleClick = () => {
-    // send an action to the server
-    client.someAction( ... );
-    client.sendAction({ type: 'someAction', ... });
-  }
 
   return (
-    <button onClick={handleClick}>
-      Click me
-    </button>
+    <CreateGameRoomClient
+      token={/*player session token*/}
+      gameId="connect4"
+      options={{ players: 2 }}
+      onCreated={(id, password) => {
+        // replace current url, so refreshing the page will rejoin the game,
+        // not create new one
+        const url = password ? `/joinGame/${id}/${password}` : `/game/${id}`;
+        window.history.replaceState(null, 'Game', url);
+        return Promise.resolve();
+      }}
+      onFailed={err => {
+        // logout or show error to player
+      }}
+    >
+      <GameRoom.Connected>
+        <ConnectFour />
+      </GameRoom.Connected>
+    </CreateGameRoomClient>
   );
-};
 }
 ```
+
+Component `CreateGameRoomClient` joins a game room
+
+```tsx
+    <JoinGameRoomClient
+      token={context.userId}
+      roomId={roomId}
+      password={params.password}
+      onFailed={err => {
+        // show error to player
+      }}
+    >
+      <GameRoom.Connected>
+        <ConnectFour />
+      </GameRoom.Connected>
+    </JoinGameRoomClient>
+  );
+```
+
+## 4) Declare game context
+
+Get context provider and hook
+
+```ts
+export const [ConnectFourProvider, useConnect4] = CreateComponentContext<'connect4', StoreData, Action>(
+  'connect4',
+  () => createGameStateStore()
+);
+```
+
+## 5) Use in React
+
+Use `useClient` to create and initialize game/component clients.
+
+```tsx
+import { useClient, GameRoomClient } from 'pureboard/client';
+import { ConnectFourClient } from './ConnectFourClient';
+import { ConnectFourProvider, useConnect4 } from './ConnectFourContext';
+
+export default function ConnectFour() {
+  // wrap game rendering logic in ConnectFourProvider - this will allow you to use useConnect4 inside
+  return (
+    <ConnectFourProvider>
+      <ConnectFourGame />
+    </ConnectFourProvider>
+  );
+}
+
+export default function ConnectFour() {
+  const { store, action } = useConnect4();
+
+  const board = store(state => state.board);
+  const currentPlayer = store(state => state.currentPlayer);
+  const messages = store(state => state.messages);
+
+  return (
+    <div>
+      <div>Current player: {currentPlayer}</div>
+      <div>Messages: {messages.length}</div>
+      <button onClick={() => void action({ type: 'move', column: 0 })}>
+        Play on column 0
+      </button>
+      <pre>{JSON.stringify(board)}</pre>
+    </div>
+  );
+}
+```
+

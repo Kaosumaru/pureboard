@@ -20,7 +20,7 @@ export class TestServer implements IServer {
   }
 
   public onGroupRemoved(_group: string, _method: (() => void) | undefined): void {
-    throw new Error('Method not implemented.');
+    // never called in tests, so we don't need to implement it
   }
 
   public groupMemberCount(group: string): number {

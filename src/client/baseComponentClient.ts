@@ -1,14 +1,13 @@
-import { Context, CurrentPlayerValidation, Store, StoreContainer } from '../shared/interface';
+import { Context, UserPermissions, Store, StoreContainer } from '../shared/interface';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
 import { ClientRandomGenerator } from './clientRandom';
 import { BaseClient } from './baseClient';
 import { getClientHiddenObjects } from './clientHiddenObjects';
 import { Signal } from 'typed-signals';
-import { GameOptions, StandardGameAction } from '../shared/standardActions';
 import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
 import { IBaseComponentClient, IDisposableClient, IGameRoomClient } from './interface';
 
-function createDummyValidation(): CurrentPlayerValidation {
+function createDummyValidation(): UserPermissions {
   return {
     isUser: () => true,
     canMoveAsPlayer: () => true,
@@ -27,7 +26,6 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     super(client.client);
 
     this.gameId = client.gameId;
-
     this.container = container;
     this.store = container.store;
     this.type = type;
@@ -39,7 +37,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     this.deinitialized = false;
     const validation = createDummyValidation();
 
-    this.onEvent(`${this.type}/onAction`, (gameId: number, action: Action | StandardGameAction, seed: number | null, hiddenInfo?: ActionHiddenObjectInfo<HiddenType>) => {
+    this.onEvent(`${this.type}/onAction`, (gameId: number, action: Action, seed: number | null, hiddenInfo?: ActionHiddenObjectInfo<HiddenType>) => {
       if (!this.hasState) return;
       if (this.gameId !== gameId) return;
       if (hiddenInfo !== undefined) {
@@ -77,7 +75,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     this.hasState = false;
   }
 
-  public sendAction(action: Action | StandardGameAction): Promise<void> {
+  public sendAction(action: Action): Promise<void> {
     return this.client.call<void>(`${this.type}/action`, this.gameId, action);
   }
 
@@ -94,7 +92,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
   }
 
   public async getState(): Promise<Data> {
-    const resp = await this.client.call<StateResponseInterface<Data, HiddenType>>(`${this.type}/getGameState`, this.gameId);
+    const resp = await this.client.call<StateResponseInterface<Data, HiddenType>>(`${this.type}/getState`, this.gameId);
     if (resp.hidden !== undefined) {
       this.hiddenState().setState(resp.hidden);
     }
@@ -103,11 +101,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
     return resp.state;
   }
 
-  public async restartGame(options: GameOptions): Promise<void> {
-    await this.sendAction({ type: 'newGame', options });
-  }
-
-  protected onAction(_action: Action | StandardGameAction): void {
+  protected onAction(_action: Action): void {
     // Override this method to handle actions
   }
 
@@ -115,5 +109,5 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
   deinitialized = false;
   type: string;
   random = new ClientRandomGenerator();
-  onAfterAction = new Signal<(arg: Action | StandardGameAction) => void>();
+  onAfterAction = new Signal<(arg: Action) => void>();
 }

@@ -1,9 +1,30 @@
 import { canUserMoveAsPlayer, createGameRoomStore, GameRoomData, GameRoomState, seatOf, UserInfo } from '../shared/gameRoomStore';
-import { Store } from '../shared/interface';
+import { ConnectionState, createConnectionStore } from '../shared/connectionStore';
+import { GameOptions, Store } from '../shared';
 import { RPCClient } from 'yawr';
 import { BaseClient } from './baseClient';
-import { GameOptions } from '../shared/standardActions';
-import { IGameRoomClient } from './interface';
+import { ConnectionInterface, IGameRoomClient, RoomInterface, SeatingInterface } from './interface';
+
+/**
+ * Options controlling the behavior of a `GameRoomClient`.
+ */
+export interface GameRoomClientOptions {
+  /**
+   * Whether the client should automatically try to reconnect after an unexpected disconnection. Defaults to `true`.
+   */
+  autoreconnect?: boolean;
+
+  /**
+   * Computes the delay (in ms) before a reconnect attempt, based on the number of tries made so far.
+   */
+  reconnectDelay?: (tries: number) => number | undefined;
+}
+
+const defaultReconnectDelay = (tries: number): number | undefined => {
+  if (tries > 5) return undefined;
+  if (tries < 2) return 1000;
+  return 5000;
+};
 
 /**
  * The `GameRoomClient` class extends the `BaseClient` and provides functionality
@@ -11,127 +32,105 @@ import { IGameRoomClient } from './interface';
  * handles WebSocket events, and provides methods for creating, joining, and managing
  * game rooms and seats.
  */
-export class GameRoomClient extends BaseClient implements IGameRoomClient {
-  /**
-   * The ID of the current game room.
-   */
+export class GameRoomClient extends BaseClient implements IGameRoomClient, SeatingInterface, ConnectionInterface, RoomInterface {
   public gameId: number | undefined;
-
-  /**
-   * The password for the current game room, if applicable.
-   */
   public gamePassword: string | undefined;
-
-  /**
-   * Information about the current user.
-   */
   public userInfo: UserInfo | undefined;
-
-  /**
-   * The Redux-like store that manages the state of the game room.
-   */
   public store: Store<GameRoomState>;
+  public connectionStore: Store<ConnectionState>;
+
+  private readonly autoreconnect: boolean;
+  private readonly reconnectDelay: (tries: number) => number | undefined;
+  private lastToken: string | undefined;
+  private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  private disconnectedIntentionally = false;
 
   /**
    * Constructs a new `GameRoomClient` instance.
    * @param path - The WebSocket path to connect to. Defaults to `/ws`.
+   * @param options - Options controlling the behavior of the client, eg. autoreconnect.
    */
-  constructor(path = '/ws') {
+  constructor(path = '/ws', options?: GameRoomClientOptions) {
     const url = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + path;
     super(new RPCClient(url));
     this.store = createGameRoomStore();
+    this.connectionStore = createConnectionStore();
+    this.autoreconnect = options?.autoreconnect ?? true;
+    this.reconnectDelay = options?.reconnectDelay ?? defaultReconnectDelay;
 
-    this.onEvent('game/tookSeat', (roomId: number, userId: UserInfo, seat: number) => {
+    this.onEvent('room/tookSeat', (roomId: number, userId: UserInfo, seat: number) => {
       if (this.gameId !== roomId) return;
       this.state().tookSeat(userId, seat);
     });
 
-    this.onEvent('game/leftSeat', (roomId: number, seat: number) => {
+    this.onEvent('room/leftSeat', (roomId: number, seat: number) => {
       if (this.gameId !== roomId) return;
       this.state().leftSeat(seat);
     });
 
-    this.onEvent('game/sendSeatsState', (roomId: number, stateData: GameRoomData) => {
+    this.onEvent('room/sendSeatsState', (roomId: number, stateData: GameRoomData) => {
       if (this.gameId !== roomId) return;
       this.state().setState(stateData);
     });
 
-    this.onEvent('game/closed', (roomId: number) => {
+    this.onEvent('room/closed', (roomId: number) => {
       if (this.gameId !== roomId) return;
       this.state().close();
     });
+
+    this.onDisconnected(() => this.handleDisconnected());
+    this.onAuthorized(() => this.handleReconnected());
   }
 
-  /**
-   * Gets the seat index of the current user.
-   * @returns The seat index of the user.
-   */
   public seatOf(): number {
     return seatOf(this.userInfo?.id ?? '', this.state());
   }
 
-  /**
-   * Checks if the current user currecntly occupies a specific seat.
-   * @param index - The index of the seat to check.
-   * @returns `true` if the user can occupy the seat, otherwise `false`.
-   */
   public haveSeat(index: number): boolean {
     return canUserMoveAsPlayer(this.userInfo?.id ?? '', this.state(), index);
   }
 
-  /**
-   * Checks if a specific seat is empty.
-   * @param index - The index of the seat to check.
-   * @returns `true` if the seat is empty, otherwise `false`.
-   */
   public isSeatEmpty(index: number): boolean {
     return this.state().seats[index] == null;
   }
 
-  /**
-   * Starts the client by connecting to the server and authorizing the user.
-   * @param token - The authorization token for the user.
-   * @returns A promise that resolves to `true` if the client started successfully, otherwise `false`.
-   */
-  public async start(token: string | undefined): Promise<boolean> {
-    if (!token) {
-      this.disconnect();
+  public async start(token: string): Promise<boolean> {
+    this.lastToken = token;
+    try {
+      await this.client.connect();
+    } catch (err) {
+      this.connectionState().setDisconnected(true);
       return false;
     }
-    await this.client.connect();
     this.userInfo = await this.client.authorize(token);
     if (!this.userInfo) {
       this.disconnect();
       return false;
     }
+    this.connectionState().setDisconnected(false);
     return true;
   }
 
-  /**
-   * Disconnects the client from the server.
-   */
   public disconnect(): void {
+    this.disconnectedIntentionally = true;
+    this.clearReconnectTimer();
     this.client.disconnect();
   }
 
-  /**
-   * Reconnects the client to the server and reinitializes the game room state.
-   * @param token - The authorization token for the user.
-   */
-  public async reconnect(token: string | undefined): Promise<void> {
+  public async reconnect(): Promise<void> {
+    if (!this.lastToken) {
+      throw new Error('No previous token available for reconnect.');
+    }
     await this.client.reconnect();
-    await this.start(token);
+    await this.start(this.lastToken);
     if (this.gameId) await this.join(this.gameId, this.gamePassword);
   }
 
-  /**
-   * Creates a new game room.
-   * @param game - The id of the game.
-   * @param options - The options for the game room.
-   * @returns A promise that resolves to a tuple containing the game room ID and password.
-   */
   public async createRoom(game: string, options: GameOptions): Promise<[number, string | undefined]> {
     const state = await this.client.call<GameRoomData>(`${game}/createGame`, options);
+    if (this.gameId) {
+      throw new Error('Already in a game room. Please leave the current room before creating another.');
+    }
     this.state().setState(state);
     this.gameId = state.id;
     this.gamePassword = state.password;
@@ -139,14 +138,12 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
     return [this.gameId, state.password];
   }
 
-  /**
-   * Joins an existing game room.
-   * @param gameId - The ID of the game room to join.
-   * @param password - The password for the game room, if required.
-   * @returns A promise that resolves to the game room ID.
-   */
   public async join(gameId: number, password?: string): Promise<number> {
-    await this.client.call<number>('game/join', gameId, password);
+    await this.client.call<number>('room/join', gameId, password);
+    if (this.gameId) {
+      throw new Error('Already in a game room. Please leave the current room before joining another.');
+    }
+
     this.gameId = gameId;
     this.gamePassword = password;
 
@@ -156,51 +153,84 @@ export class GameRoomClient extends BaseClient implements IGameRoomClient {
     return this.gameId;
   }
 
-  /**
-   * Takes a specific seat in the game room.
-   * @param seat - The index of the seat to take.
-   */
   public async takeSeat(seat: number): Promise<void> {
-    await this.client.call('game/takeSeat', this.gameId, seat);
+    await this.client.call('room/takeSeat', this.gameId, seat);
   }
 
-  /**
-   * Leaves a specific seat in the game room.
-   * @param seat - The index of the seat to leave.
-   */
   public async leaveSeat(seat: number): Promise<void> {
-    await this.client.call('game/leaveSeat', this.gameId, seat);
+    await this.client.call('room/leaveSeat', this.gameId, seat);
   }
 
-  /**
-   * Takes the first available seat in the game room.
-   * @returns A promise that resolves to the index of the seat taken.
-   */
   public async takeAvailableSeat(): Promise<number> {
-    return await this.client.call<number>('game/takeAvailableSeat', this.gameId);
+    return await this.client.call<number>('room/takeAvailableSeat', this.gameId);
   }
 
-  /**
-   * Closes the current game room.
-   */
-  public async close(): Promise<void> {
-    await this.client.call('game/close', this.gameId);
+  public async closeRoom(): Promise<void> {
+    if (this.gameId) {
+      await this.client.call('room/close', this.gameId);
+    }
+    this.gameId = undefined;
+    this.gamePassword = undefined;
   }
 
   /**
    * Retrieves the current state of the game room from server.
    * @returns A promise that resolves to the game room state data.
    */
-  public async getState(): Promise<GameRoomData> {
-    return await this.client.call<GameRoomData>('game/getSeatsState', this.gameId);
+  private async getState(): Promise<GameRoomData> {
+    return await this.client.call<GameRoomData>('room/getSeatsState', this.gameId);
   }
 
   /**
    * Retrieves the current state from the store.
    * @returns The current state of the game room.
-   * @private
    */
   private state() {
     return this.store.getState();
+  }
+
+  /**
+   * Retrieves the current connection state from the connection store.
+   * @returns The current connection state.
+   */
+  private connectionState() {
+    return this.connectionStore.getState();
+  }
+
+  private handleDisconnected(): void {
+    this.connectionState().setDisconnected(true);
+    if (this.autoreconnect && !this.disconnectedIntentionally) this.scheduleReconnect();
+  }
+
+  private handleReconnected(): void {
+    this.disconnectedIntentionally = false;
+    this.clearReconnectTimer();
+    this.connectionState().reset();
+    this.connectionState().setDisconnected(false);
+  }
+
+  private scheduleReconnect(): void {
+    const tries = this.connectionState().triesToConnect;
+    const delay = this.reconnectDelay(tries);
+
+    this.clearReconnectTimer();
+    if (!delay) {
+      this.connectionState().setAutoreconnecting(false);
+      return;
+    }
+
+    this.connectionState().setAutoreconnecting(true);
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnect().catch(() => {
+        this.connectionState().setTriesToConnect(tries + 1);
+        this.scheduleReconnect();
+      });
+    }, delay);
+  }
+
+  private clearReconnectTimer(): void {
+    if (this.reconnectTimer === undefined) return;
+    clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = undefined;
   }
 }
