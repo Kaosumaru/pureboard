@@ -1,12 +1,12 @@
 import { Context } from 'yawr';
 import { UserPermissions } from '../../shared/interface';
 
-type OverrideValidation = (ctx: Context, gameId: number) => UserPermissions;
+type OverridePermissions = (ctx: Context, gameId: number) => UserPermissions;
 
-export let overridenComponentContainerValidation: OverrideValidation | undefined;
+export let overridenComponentContainerPermissions: OverridePermissions | undefined;
 
-export function overrideComponentContainerValidation(validation: OverrideValidation, cb: () => void): void {
-  overridenComponentContainerValidation = validation;
+export function overrideComponentContainerPermissions(permissions: OverridePermissions, cb: () => void): void {
+  overridenComponentContainerPermissions = permissions;
   cb();
-  overridenComponentContainerValidation = undefined;
+  overridenComponentContainerPermissions = undefined;
 }

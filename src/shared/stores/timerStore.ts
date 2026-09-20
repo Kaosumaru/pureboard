@@ -60,8 +60,8 @@ export function createGameStateStore(maxTimeInSeconds: number, players: number, 
   );
 }
 
-function setActivePlayer(playerValidation: UserPermissions, data: StoreData, player: number | undefined, now: number): StoreData {
-  if (!playerValidation.isServerOriginating()) throw new Error('Not server originating');
+function setActivePlayer(permissions: UserPermissions, data: StoreData, player: number | undefined, now: number): StoreData {
+  if (!permissions.isServerOriginating()) throw new Error('Not server originating');
 
   const { players } = data;
 
@@ -87,9 +87,9 @@ function setActivePlayer(playerValidation: UserPermissions, data: StoreData, pla
 function makeAction(ctx: Context, store: StoreData, action: Action): StoreData | Partial<StoreData> {
   switch (action.type) {
     case 'setActivePlayer':
-      return setActivePlayer(ctx.playerValidation, store, action.player, action.currentTimestamp);
+      return setActivePlayer(ctx.userPermissions, store, action.player, action.currentTimestamp);
     case 'restart':
-      if (!ctx.playerValidation.isServerOriginating()) throw new Error('Not server originating');
+      if (!ctx.userPermissions.isServerOriginating()) throw new Error('Not server originating');
       return { ...store, activePlayer: undefined, players: createPlayers(store.players.length) };
   }
 }

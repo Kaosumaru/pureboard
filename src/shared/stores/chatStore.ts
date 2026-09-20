@@ -36,7 +36,7 @@ function makeAction(ctx: Context, store: StoreData, action: Action): StoreData |
   switch (action.type) {
     case 'message': {
       const { id, name } = action.message.user;
-      if (!ctx.playerValidation.isUser(id, name)) throw new Error('Not allowed to send message');
+      if (!ctx.userPermissions.isUser(id, name)) throw new Error('Not allowed to send message');
       return { messages: [...store.messages, action.message] };
     }
   }

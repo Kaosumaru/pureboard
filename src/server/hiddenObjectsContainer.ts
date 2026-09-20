@@ -68,12 +68,12 @@ export class HiddenObjectContainer<Type> implements IHiddenObjects<Type> {
     });
   }
 
-  getState(validation: UserPermissions): IHiddenObjectWrapperMap<Type> {
-    return Object.fromEntries([...this.hiddenObjects.entries()].filter(([_, object]) => isVisible(object, validation)));
+  getState(permissions: UserPermissions): IHiddenObjectWrapperMap<Type> {
+    return Object.fromEntries([...this.hiddenObjects.entries()].filter(([_, object]) => isVisible(object, permissions)));
   }
 
-  getStateDelta(validation: UserPermissions): IHiddenObjectWrapperMap<Type> {
-    return Object.fromEntries([...this.queuedHiddenObjects.entries()].map(([id, object]) => (isVisible(object, validation) ? [id, object] : [id, null])));
+  getStateDelta(permissions: UserPermissions): IHiddenObjectWrapperMap<Type> {
+    return Object.fromEntries([...this.queuedHiddenObjects.entries()].map(([id, object]) => (isVisible(object, permissions) ? [id, object] : [id, null])));
   }
 
   flushDelta(): void {
@@ -102,8 +102,8 @@ export class HiddenObjectContainer<Type> implements IHiddenObjects<Type> {
   }
 }
 
-function isVisible<Type>(obj: IHiddenObjectWrapper<Type>, validation: UserPermissions): boolean {
-  return obj.visibleOnlyTo === undefined || validation.canMoveAsPlayer(obj.visibleOnlyTo);
+function isVisible<Type>(obj: IHiddenObjectWrapper<Type>, permissions: UserPermissions): boolean {
+  return obj.visibleOnlyTo === undefined || permissions.canMoveAsPlayer(obj.visibleOnlyTo);
 }
 
 function shuffleArrayInPlace<T>(array: T[]): T[] {

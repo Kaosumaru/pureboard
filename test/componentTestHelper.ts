@@ -1,11 +1,11 @@
 import { TestServer } from './testServer';
 import { UserPermissions } from '../src/shared/interface';
-import { overrideComponentContainerValidation } from '../src/server/test/server';
+import { overrideComponentContainerPermissions } from '../src/server/test/server';
 import { Context } from 'yawr';
 import { deleteRoom, ComponentConstructor, createRoom } from '../src/server/rooms';
 import { IDisposableClient, IGameRoomClient } from '../src/client/interface';
 
-function createComponentValidation(ctx: Context, _gameId: number): UserPermissions {
+function createComponentPermissions(ctx: Context, _gameId: number): UserPermissions {
   const userId = ctx.userId ?? '';
   const userName = ctx.userName ?? '';
 
@@ -28,7 +28,7 @@ export async function componentTestHelper<ComponentClient extends IDisposableCli
 ): Promise<void> {
   const server = new TestServer();
   const client = server.createClient();
-  overrideComponentContainerValidation(createComponentValidation, () => {
+  overrideComponentContainerPermissions(createComponentPermissions, () => {
     data.registerServerComponents(server);
   });
 

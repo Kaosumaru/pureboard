@@ -114,8 +114,13 @@ export interface IHiddenObjects<T> {
   clearObjects(): void;
 }
 
+/*
+ * @param userPermissions - The validation object for the current player.
+ * @param random - A random generator instance used for randomness in the action.
+ * @param objects - Optional hidden objects of type `IHiddenObjects<HiddenType>`.
+ */
 export interface Context<HiddenType = any> {
-  playerValidation: UserPermissions;
+  userPermissions: UserPermissions;
   random: RandomGenerator;
   objects?: IHiddenObjects<HiddenType>;
 }
@@ -141,10 +146,6 @@ export interface GameOptions {
  * @property reducer - A reducer function that processes actions, and returns a new state.
  *                    It typically validates the current player, and optionally interacts with hidden objects and a random generator.
  *
- * @param playerValidation - The validation object for the current player.
- * @param reducer - The action to be processed.
- * @param random - A random generator instance used for randomness in the action.
- * @param objects - Optional hidden objects of type `IHiddenObjects<HiddenType>`.
  */
 export interface StoreContainer<StateType, ActionType, HiddenType = any> {
   store: Store<StateType>;

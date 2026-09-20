@@ -7,7 +7,7 @@ import { Signal } from 'typed-signals';
 import { ActionHiddenObjectInfo, StateResponseInterface } from '../shared/internalInterface';
 import { IBaseComponentClient, IDisposableClient, IGameRoomClient } from './interface';
 
-function createDummyValidation(): UserPermissions {
+function createDummyPermissions(): UserPermissions {
   return {
     isUser: () => true,
     canMoveAsPlayer: () => true,
@@ -35,7 +35,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
   public async initialize(): Promise<void> {
     this.hasState = false;
     this.deinitialized = false;
-    const validation = createDummyValidation();
+    const permissions = createDummyPermissions();
 
     this.onEvent(`${this.type}/onAction`, (gameId: number, action: Action, seed: number | null, hiddenInfo?: ActionHiddenObjectInfo<HiddenType>) => {
       if (!this.hasState) return;
@@ -46,7 +46,7 @@ export class BaseComponentClient<Data, Action, HiddenType = any> extends BaseCli
 
       this.random.setSeed(seed !== null ? seed : undefined);
       const context: Context<HiddenType> = {
-        playerValidation: validation,
+        userPermissions: permissions,
         random: this.random,
         objects: getClientHiddenObjects(hiddenInfo),
       };

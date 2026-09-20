@@ -48,13 +48,13 @@ const rooms = new Map<number, GameRoom>();
 let lastId = 0;
 
 /**
- * Creates a validation helper bound to the current user and game room.
- * This is used to validate whether a user can perform actions as a specific player in the game.
+ * Creates a permissions helper bound to the current user and game room.
+ * This is used to check whether a user can perform actions as a specific player in the game.
  * (a user can only move as a player if they have taken that seat in the game room).
  *
  * @param ctx - Request context.
  * @param roomId - Target game id.
- * @returns Validation callbacks used by game actions.
+ * @returns Permission callbacks used by game actions.
  */
 export function createUserPermissions(ctx: Context, roomId: number): UserPermissions {
   const room = getRoomData(ctx, roomId);
