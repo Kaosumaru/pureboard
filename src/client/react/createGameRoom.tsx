@@ -18,8 +18,7 @@ export function CreateGameRoomClient(props: CreateGameRoomClientProps): JSX.Elem
       return props.onFailed?.(new Error('Failed to create game room')) ?? Promise.resolve();
     },
     onSuccess: async client => {
-      const game = 'connect4';
-      const [id, password] = await client.createRoom(game, props.options);
+      const [id, password] = await client.createRoom(props.gameId, props.options);
 
       if (props.takeAvailableSeat ?? true) {
         await client.takeAvailableSeat();
