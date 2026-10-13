@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { ConnectionInterface, SeatingInterface, RoomInterface } from '../interface';
 import { GameRoomContext } from './useClient';
+import { SinglePlayerGameRoomContext } from './createSinglePlayerGameRoom';
 
 export function useRoomContext(): RoomInterface {
   const gameRoomClient = useContext(GameRoomContext);
@@ -20,8 +21,10 @@ export function useConnectionContext(): ConnectionInterface {
 
 export function useSeatingContext(): SeatingInterface {
   const gameRoomClient = useContext(GameRoomContext);
-  if (gameRoomClient === null) {
+  const singlePlayerClient = useContext(SinglePlayerGameRoomContext);
+  const client = gameRoomClient ?? singlePlayerClient;
+  if (client === null) {
     throw new Error('useSeatingContext must be used within a GameRoomProvider');
   }
-  return gameRoomClient;
+  return client;
 }

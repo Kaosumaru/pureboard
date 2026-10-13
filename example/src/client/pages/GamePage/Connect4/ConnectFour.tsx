@@ -6,7 +6,7 @@ import GameTabs, { ETabs } from '../Components/GameTabs';
 import { ConnectFourProvider, useConnect4 } from './ConnectFourContext';
 import { PlayersRow } from './ConnectFourPlayersRow';
 
-function ConnectFourGame() {
+export function ConnectFourGame() {
   const { store, action } = useConnect4();
   const board = store(state => state.board);
   const winner = store(state => state.victoriousPlayer);

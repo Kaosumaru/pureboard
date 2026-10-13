@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import LogoutPage from './pages/LogoutPage/LogoutPage';
 import JoinGamePage from './pages/GamePage/JoinGamePage';
 import CreateGamePage from './pages/GamePage/CreateGamePage';
+import SinglePlayerGamePage from './pages/GamePage/SinglePlayerGamePage';
 
 const darkTheme = createTheme({
   palette: {
@@ -32,6 +33,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               }
             />
             <Route path="/logout" element={<LogoutPage />} />
+            <Route path="/singleplayer" element={<SinglePlayerGamePage />} />
             <Route
               path="/"
               element={
