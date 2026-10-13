@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo } from 'react';
-import { HiddenObjectsState, Store } from '../../shared';
+import { HiddenObjectsState, Store, StoreContainer } from '../../shared';
 import { OfflineGameRoomContext } from './createOfflineGameRoom';
 import type { ComponentContext, StoreConstructor } from './reactComponents';
 import { createUseOnAction } from './useOnAction';
@@ -12,7 +12,8 @@ export function useOfflineComponentContext<Data, Action, HiddenType = any>(const
   }
 
   const context = useMemo(() => {
-    const container = constructor();
+    // the client can already have a store, eg. with a game that was played forward before rendering
+    const container = (offlineClient.container as StoreContainer<Data, Action, HiddenType> | undefined) ?? constructor();
     return {
       container,
       store: container.store,

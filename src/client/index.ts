@@ -2,6 +2,7 @@ export * from './baseClient';
 export * from './baseComponentClient';
 export * from './clientHiddenObjects';
 export * from './clientRandom';
+export * from './seededRandom';
 export * from './gameRoomClient';
 export * from './offlineGameRoomClient';
 export * from './interface';

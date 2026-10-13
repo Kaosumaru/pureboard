@@ -2,17 +2,18 @@ import { Signal } from 'typed-signals';
 import { canUserMoveAsPlayer, createGameRoomStore, GameRoomState, seatOf, UserInfo } from '../shared/gameRoomStore';
 import { ConnectionState, createConnectionStore } from '../shared/connectionStore';
 import { createHiddenObjectsStore, HiddenObjectsState } from '../shared/hiddenObjectsStore';
-import { Context, GameOptions, Store, StoreContainer, UserPermissions } from '../shared/interface';
+import { Context, GameOptions, RandomGenerator, Store, StoreContainer, UserPermissions } from '../shared/interface';
 import { HiddenObjectContainer } from '../server/hiddenObjectsContainer';
 import { ServerRandomGenerator } from '../server/serverRandom';
 import { SeatingInterface } from './interface';
+import { SeededRandomGenerator } from './seededRandom';
 
 /**
  * Options controlling the behavior of a `OfflineGameRoomClient`.
  */
-export interface OfflineGameRoomClientOptions<Action = any> {
+export interface OfflineGameRoomClientOptions<Data = any, Action = any, HiddenType = any> {
   /**
-   * Action applied to the store of the game right after it is set.
+   * Action applied to the store of the game, as soon as both the store is set and the room is created.
    */
   initialAction?: (options: GameOptions) => Action | undefined;
 
@@ -20,6 +21,28 @@ export interface OfflineGameRoomClientOptions<Action = any> {
    * Information about the local user. Defaults to `{ id: 'local', name: 'Player' }`.
    */
   userInfo?: UserInfo;
+
+  /**
+   * Number of seats. If set, the room is created right away, so `createRoom` doesn't need to be called.
+   */
+  players?: number;
+
+  /**
+   * Initial state of the seats, which can also contain users other than the local one.
+   * If set, the room is created right away, with as many seats as there are entries (`players` is ignored).
+   */
+  seats?: (UserInfo | null)[];
+
+  /**
+   * The store of the game. If not set, it is set later by the offline provider of the game, or with `setContainer`.
+   */
+  container?: StoreContainer<Data, Action, HiddenType>;
+
+  /**
+   * Seed for the random generator. If set, the same sequence of actions always produces the same game.
+   * If not set, the game is different each time.
+   */
+  seed?: number;
 }
 
 /**
@@ -43,18 +66,29 @@ export class OfflineGameRoomClient<Data = any, Action = any, HiddenType = any> i
   private readonly initialAction?: (options: GameOptions) => Action | undefined;
   private hiddenObjects?: HiddenObjectContainer<HiddenType>;
   private gameOptions: GameOptions | undefined;
-  private readonly random = new ServerRandomGenerator();
+  private initialActionApplied = false;
+  private readonly random: RandomGenerator;
 
   /**
    * Constructs a new `OfflineGameRoomClient` instance.
    * @param options - Settings of the game, and optionally information about the local user.
    */
-  constructor(options: OfflineGameRoomClientOptions<Action> = {}) {
+  constructor(options: OfflineGameRoomClientOptions<Data, Action, HiddenType> = {}) {
     this.hiddenObjectsStore = createHiddenObjectsStore<HiddenType>();
     this.initialAction = options.initialAction;
     this.userInfo = options.userInfo ?? { id: 'local', name: 'Player' };
     this.store = createGameRoomStore();
     this.connectionStore = createConnectionStore();
+    this.random = options.seed !== undefined ? new SeededRandomGenerator(options.seed) : new ServerRandomGenerator();
+
+    if (options.container) {
+      this.setContainer(options.container);
+    }
+    if (options.seats) {
+      this.openRoom({ players: options.seats.length }, options.seats);
+    } else if (options.players !== undefined) {
+      this.openRoom({ players: options.players });
+    }
   }
 
   public seatOf(): number {
@@ -71,21 +105,7 @@ export class OfflineGameRoomClient<Data = any, Action = any, HiddenType = any> i
 
   // eslint-disable-next-line @typescript-eslint/require-await
   public async createRoom(options: GameOptions): Promise<[number, string | undefined]> {
-    if (this.gameId) {
-      throw new Error('Already in a game room. Please leave the current room before creating another.');
-    }
-
-    this.state().setState({
-      id: localRoomId,
-      seats: Array.from({ length: options.players }, () => null),
-      type: localGameType,
-      timeoutToClose: undefined,
-      closed: false,
-    });
-    this.gameId = localRoomId;
-    this.gameOptions = options;
-
-    return [this.gameId, undefined];
+    return [this.openRoom(options), undefined];
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -121,21 +141,18 @@ export class OfflineGameRoomClient<Data = any, Action = any, HiddenType = any> i
   }
 
   /**
-   * Sets the store of the game, and applies the initial action to it.
-   * Called by the component of the game (eg. the one created with `CreateComponentContext`), so the store is defined only once.
+   * Sets the store of the game, and applies the initial action to it (or as soon as the room is created).
+   * Called by the offline provider of the game (eg. the one created with `CreateComponentContext`), unless the store was already set.
    * @param container - The store holding the state of the game.
    */
   public setContainer(container: StoreContainer<Data, Action, HiddenType>): void {
-    this.requireRoom();
     if (this.container === container) return;
     this.container = container;
     this.hiddenObjects = container.hasHiddenState ? new HiddenObjectContainer<HiddenType>() : undefined;
     this.hiddenObjectsStore.getState().setState({});
+    this.initialActionApplied = false;
 
-    const initialAction = this.gameOptions && this.initialAction?.(this.gameOptions);
-    if (initialAction) {
-      this.applyAction(initialAction);
-    }
+    this.applyInitialAction();
   }
 
   /**
@@ -161,6 +178,38 @@ export class OfflineGameRoomClient<Data = any, Action = any, HiddenType = any> i
     this.updateHiddenObjectsStore();
 
     this.onAfterAction.emit(action);
+  }
+
+  private openRoom(options: GameOptions, seats?: (UserInfo | null)[]): number {
+    if (this.gameId !== undefined) {
+      throw new Error('Already in a game room. Please leave the current room before creating another.');
+    }
+
+    this.state().setState({
+      id: localRoomId,
+      seats: seats ? [...seats] : Array.from({ length: options.players }, () => null),
+      type: localGameType,
+      timeoutToClose: undefined,
+      closed: false,
+    });
+    this.gameId = localRoomId;
+    this.gameOptions = options;
+
+    this.applyInitialAction();
+    return localRoomId;
+  }
+
+  /**
+   * Applies the initial action once both the room and the store of the game are available.
+   */
+  private applyInitialAction(): void {
+    if (this.initialActionApplied || !this.container || !this.gameOptions) return;
+    this.initialActionApplied = true;
+
+    const initialAction = this.initialAction?.(this.gameOptions);
+    if (initialAction) {
+      this.applyAction(initialAction);
+    }
   }
 
   /**

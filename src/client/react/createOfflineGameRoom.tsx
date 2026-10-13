@@ -28,6 +28,11 @@ interface CreateOfflineGameRoomClientProps<Action> extends React.PropsWithChildr
   userInfo?: UserInfo;
 
   /**
+   * Seed for the random generator. If set, the same sequence of actions always produces the same game.
+   */
+  seed?: number;
+
+  /**
    * Whether all seats should be taken by the local user. Defaults to `true`.
    */
   takeAllSeats?: boolean;
@@ -56,6 +61,7 @@ export function CreateOfflineGameRoomClient<Action>(props: CreateOfflineGameRoom
     const client = new OfflineGameRoomClient({
       initialAction: props.initialAction,
       userInfo: props.userInfo,
+      seed: props.seed,
     });
 
     const create = async () => {

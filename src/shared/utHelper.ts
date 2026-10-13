@@ -101,6 +101,10 @@ class TestRandom implements RandomGenerator {
         return max - 1;
     }
   }
+
+  reset(): void {
+    // nothing to reset, values depend only on the mode
+  }
 }
 
 /**

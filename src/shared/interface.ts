@@ -53,6 +53,11 @@ export interface RandomGenerator {
    * @returns A random integer between `min` (inclusive) and `max` (inclusive).
    */
   intBetween(min: number, max: number): number;
+
+  /**
+   * Resets the state of the generator. Called before each action is applied.
+   */
+  reset(): void;
 }
 
 /**

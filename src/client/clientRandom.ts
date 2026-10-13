@@ -16,6 +16,10 @@ export class ClientRandomGenerator implements RandomGenerator {
     return this.randomSeed.intBetween(min, max);
   }
 
+  reset(): void {
+    this.randomSeed = undefined;
+  }
+
   setSeed(seed: number | undefined): void {
     this.randomSeed = seed ? create(seed.toString()) : undefined;
   }
