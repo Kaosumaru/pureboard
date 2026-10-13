@@ -1,24 +1,24 @@
 import { createContext, JSX, useEffect, useState } from 'react';
 import { GameOptions } from '../../shared/interface';
 import { UserInfo } from '../../shared/gameRoomStore';
-import { SinglePlayerGameRoomClient } from '../singlePlayerGameRoomClient';
+import { OfflineGameRoomClient } from '../offlineGameRoomClient';
 
-export const SinglePlayerGameRoomContext = createContext<SinglePlayerGameRoomClient | null>(null);
+export const OfflineGameRoomContext = createContext<OfflineGameRoomClient | null>(null);
 
 /**
- * Props of the `CreateSinglePlayerGameRoomClient` component, which creates a serverless game room
+ * Props of the `CreateOfflineGameRoomClient` component, which creates a serverless game room
  * and provides it to its children. The props are read only once, when the component is mounted.
  *
  * @template Action - The type of the actions of the game.
  */
-interface CreateSinglePlayerGameRoomClientProps<Action> extends React.PropsWithChildren {
+interface CreateOfflineGameRoomClientProps<Action> extends React.PropsWithChildren {
   /**
    * The options for the game room, eg. the number of seats.
    */
   options: GameOptions;
 
   /**
-   * Action applied to the store of the game right after it is set by the single player provider of the game.
+   * Action applied to the store of the game right after it is set by the offline provider of the game.
    */
   initialAction?: (options: GameOptions) => Action | undefined;
 
@@ -40,7 +40,7 @@ interface CreateSinglePlayerGameRoomClientProps<Action> extends React.PropsWithC
   /**
    * Called after the game room is created and the seats are taken.
    */
-  onCreated?: (client: SinglePlayerGameRoomClient) => Promise<void>;
+  onCreated?: (client: OfflineGameRoomClient) => Promise<void>;
 
   /**
    * Called when creating the game room failed, or `onCreated` has thrown.
@@ -48,12 +48,12 @@ interface CreateSinglePlayerGameRoomClientProps<Action> extends React.PropsWithC
   onFailed?: (error: Error) => Promise<void>;
 }
 
-export function CreateSinglePlayerGameRoomClient<Action>(props: CreateSinglePlayerGameRoomClientProps<Action>): JSX.Element {
-  const [gameClient, setGameClient] = useState<SinglePlayerGameRoomClient | undefined>(undefined);
+export function CreateOfflineGameRoomClient<Action>(props: CreateOfflineGameRoomClientProps<Action>): JSX.Element {
+  const [gameClient, setGameClient] = useState<OfflineGameRoomClient | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
-    const client = new SinglePlayerGameRoomClient({
+    const client = new OfflineGameRoomClient({
       initialAction: props.initialAction,
       userInfo: props.userInfo,
     });
@@ -89,5 +89,5 @@ export function CreateSinglePlayerGameRoomClient<Action>(props: CreateSinglePlay
     return <></>;
   }
 
-  return <SinglePlayerGameRoomContext.Provider value={gameClient}>{props.children}</SinglePlayerGameRoomContext.Provider>;
+  return <OfflineGameRoomContext.Provider value={gameClient}>{props.children}</OfflineGameRoomContext.Provider>;
 }

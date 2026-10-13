@@ -8,9 +8,9 @@ import { ServerRandomGenerator } from '../server/serverRandom';
 import { SeatingInterface } from './interface';
 
 /**
- * Options controlling the behavior of a `SinglePlayerGameRoomClient`.
+ * Options controlling the behavior of a `OfflineGameRoomClient`.
  */
-export interface SinglePlayerGameRoomClientOptions<Action = any> {
+export interface OfflineGameRoomClientOptions<Action = any> {
   /**
    * Action applied to the store of the game right after it is set.
    */
@@ -23,13 +23,13 @@ export interface SinglePlayerGameRoomClientOptions<Action = any> {
 }
 
 /**
- * The `SinglePlayerGameRoomClient` class is a serverless counterpart of the `GameRoomClient`.
+ * The `OfflineGameRoomClient` class is a serverless counterpart of the `GameRoomClient`.
  * It keeps the game room in an internal store, and applies actions locally to the store of the game.
  *
  * As there is no server, the local user is allowed to send every action, including the ones
  * that would normally be available only to other players or to the server.
  */
-export class SinglePlayerGameRoomClient<Data = any, Action = any, HiddenType = any> implements SeatingInterface {
+export class OfflineGameRoomClient<Data = any, Action = any, HiddenType = any> implements SeatingInterface {
   public gameId: number | undefined;
   public gamePassword: string | undefined;
   public userInfo: UserInfo | undefined;
@@ -46,10 +46,10 @@ export class SinglePlayerGameRoomClient<Data = any, Action = any, HiddenType = a
   private readonly random = new ServerRandomGenerator();
 
   /**
-   * Constructs a new `SinglePlayerGameRoomClient` instance.
+   * Constructs a new `OfflineGameRoomClient` instance.
    * @param options - Settings of the game, and optionally information about the local user.
    */
-  constructor(options: SinglePlayerGameRoomClientOptions<Action> = {}) {
+  constructor(options: OfflineGameRoomClientOptions<Action> = {}) {
     this.hiddenObjectsStore = createHiddenObjectsStore<HiddenType>();
     this.initialAction = options.initialAction;
     this.userInfo = options.userInfo ?? { id: 'local', name: 'Player' };

@@ -2,7 +2,7 @@ import { useContext, useMemo, useEffect, createContext, ReactNode, JSX } from 'r
 import { BaseComponentClient } from '../baseComponentClient';
 import { HiddenObjectsState, Store, StoreContainer } from '../../shared';
 import { GameRoomContext } from './useClient';
-import { useSinglePlayerComponentContext } from './singlePlayerComponentContext';
+import { useOfflineComponentContext } from './offlineComponentContext';
 import { createUseOnAction } from './useOnAction';
 
 export interface ComponentContext<Data, Action, HiddenType = any> {
@@ -49,7 +49,7 @@ function useComponentContext<Data, Action, HiddenType = any>(id: string, constru
 
 type ComponentProviderType = ({ children }: { children: ReactNode }) => JSX.Element;
 
-// [provider, hook to access the component, provider to be used in a single player game room]
+// [provider, hook to access the component, provider to be used in an offline game room]
 type CreateComponentContextReturnType<Data, Action, HiddenType> = [ComponentProviderType, () => ComponentContext<Data, Action, HiddenType>, ComponentProviderType];
 
 export function CreateComponentContext<Type extends string, Data, Action, HiddenType = any>(
@@ -63,8 +63,8 @@ export function CreateComponentContext<Type extends string, Data, Action, Hidden
     return <ComponentContext.Provider value={component}>{children}</ComponentContext.Provider>;
   };
 
-  const singlePlayerProvider = function SinglePlayerComponentProvider({ children }: { children: ReactNode }) {
-    const component = useSinglePlayerComponentContext<Data, Action, HiddenType>(constructor);
+  const offlineProvider = function OfflineComponentProvider({ children }: { children: ReactNode }) {
+    const component = useOfflineComponentContext<Data, Action, HiddenType>(constructor);
     return <ComponentContext.Provider value={component}>{children}</ComponentContext.Provider>;
   };
 
@@ -76,5 +76,5 @@ export function CreateComponentContext<Type extends string, Data, Action, Hidden
     return context;
   };
 
-  return [provider, useContextHook, singlePlayerProvider] as const;
+  return [provider, useContextHook, offlineProvider] as const;
 }
