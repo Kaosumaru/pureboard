@@ -29,18 +29,15 @@ const random = new ServerRandomGenerator();
 type ActionHookType<StateType, ActionType> = (store: Store<StateType>, id: number, ctx: GroupEmitter, action: ActionType, permissions: UserPermissions) => void;
 
 export class ComponentHandler<Data, ActionType extends IAction, HiddenObjectType = any> {
-  protected hasHiddenState: boolean;
-
-  constructor(type: string, hasHiddenState = false) {
+  constructor(type: string) {
     this.type = type;
-    this.hasHiddenState = hasHiddenState;
   }
 
   createComponent(container: StoreContainer<Data, ActionType, HiddenObjectType>, settings: IComponentSettings<Data, ActionType> = {}, initialAction?: ActionType) {
     return (id: number): Component => {
       const component = new GenericComponent<Data, ActionType, HiddenObjectType>(container);
 
-      const hiddenObjects = this.hasHiddenState ? new HiddenObjectContainer<HiddenObjectType>() : undefined;
+      const hiddenObjects = container.hasHiddenState ? new HiddenObjectContainer<HiddenObjectType>() : undefined;
 
       random.reset();
 
@@ -170,7 +167,7 @@ export function registerGame<Data, ActionType extends IAction, HiddenObjectType 
   storeConstructor: () => StoreContainer<Data, ActionType, HiddenObjectType>,
   settings: ICreationSettings<Data, ActionType>
 ): void {
-  const componentHandler = new ComponentHandler<Data, ActionType, HiddenObjectType>(type, settings.hasHiddenState ?? false);
+  const componentHandler = new ComponentHandler<Data, ActionType, HiddenObjectType>(type);
   componentHandler.registerWithCreateHandler(server, storeConstructor, settings);
 }
 
@@ -179,7 +176,6 @@ export interface ICreationSettings<StateType, ActionType> {
   afterAction?: ActionHookType<StateType, ActionType>;
   beforeAction?: ActionHookType<StateType, ActionType>;
   timeout?: number;
-  hasHiddenState?: boolean;
   initialAction?: (options: RoomOptions) => ActionType | undefined;
 }
 

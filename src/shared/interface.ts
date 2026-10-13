@@ -53,6 +53,11 @@ export interface RandomGenerator {
    * @returns A random integer between `min` (inclusive) and `max` (inclusive).
    */
   intBetween(min: number, max: number): number;
+
+  /**
+   * Resets the state of the generator. Called before each action is applied.
+   */
+  reset(): void;
 }
 
 /**
@@ -145,9 +150,11 @@ export interface GameOptions {
  * @property store - The store instance that manages the application state.
  * @property reducer - A reducer function that processes actions, and returns a new state.
  *                    It typically validates the current player, and optionally interacts with hidden objects and a random generator.
+ * @property hasHiddenState - Whether the reducer uses hidden objects. Defaults to `false`.
  *
  */
 export interface StoreContainer<StateType, ActionType, HiddenType = any> {
   store: Store<StateType>;
   reducer: (ctx: Context<HiddenType>, action: ActionType) => void;
+  hasHiddenState?: boolean;
 }

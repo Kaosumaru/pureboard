@@ -2,6 +2,8 @@ import { useContext, useMemo, useEffect, createContext, ReactNode, JSX } from 'r
 import { BaseComponentClient } from '../baseComponentClient';
 import { HiddenObjectsState, Store, StoreContainer } from '../../shared';
 import { GameRoomContext } from './useClient';
+import { useOfflineComponentContext } from './offlineComponentContext';
+import { createUseOnAction } from './useOnAction';
 
 export interface ComponentContext<Data, Action, HiddenType = any> {
   // store for the component's state
@@ -17,7 +19,7 @@ export interface ComponentContext<Data, Action, HiddenType = any> {
   useOnAction: (handler: (action: Action) => void) => void;
 }
 
-type StoreConstructor<Data, Action, HiddenType> = () => StoreContainer<Data, Action, HiddenType>;
+export type StoreConstructor<Data, Action, HiddenType> = () => StoreContainer<Data, Action, HiddenType>;
 
 function useComponentContext<Data, Action, HiddenType = any>(id: string, constructor: StoreConstructor<Data, Action, HiddenType>): ComponentContext<Data, Action, HiddenType> {
   const gameRoomClient = useContext(GameRoomContext);
@@ -32,14 +34,7 @@ function useComponentContext<Data, Action, HiddenType = any>(id: string, constru
       action: client.sendAction.bind(client),
       client: client,
       hiddenObjectsStore: client.hiddenObjectsStore,
-      useOnAction: (handler: (action: Action) => void) => {
-        useEffect(() => {
-          const connection = client.onAfterAction.connect(handler);
-          return () => {
-            connection.disconnect();
-          };
-        }, [handler]);
-      },
+      useOnAction: createUseOnAction<Action>(client.onAfterAction),
     };
   }, [gameRoomClient, constructor, id]);
 
@@ -52,7 +47,10 @@ function useComponentContext<Data, Action, HiddenType = any>(id: string, constru
   return context;
 }
 
-type CreateComponentContextReturnType<Data, Action, HiddenType> = [({ children }: { children: ReactNode }) => JSX.Element, () => ComponentContext<Data, Action, HiddenType>];
+type ComponentProviderType = ({ children }: { children: ReactNode }) => JSX.Element;
+
+// [provider, hook to access the component, provider to be used in an offline game room]
+type CreateComponentContextReturnType<Data, Action, HiddenType> = [ComponentProviderType, () => ComponentContext<Data, Action, HiddenType>, ComponentProviderType];
 
 export function CreateComponentContext<Type extends string, Data, Action, HiddenType = any>(
   id: Type,
@@ -65,6 +63,11 @@ export function CreateComponentContext<Type extends string, Data, Action, Hidden
     return <ComponentContext.Provider value={component}>{children}</ComponentContext.Provider>;
   };
 
+  const offlineProvider = function OfflineComponentProvider({ children }: { children: ReactNode }) {
+    const component = useOfflineComponentContext<Data, Action, HiddenType>(constructor);
+    return <ComponentContext.Provider value={component}>{children}</ComponentContext.Provider>;
+  };
+
   const useContextHook = () => {
     const context = useContext(ComponentContext);
     if (!context) {
@@ -73,5 +76,5 @@ export function CreateComponentContext<Type extends string, Data, Action, Hidden
     return context;
   };
 
-  return [provider, useContextHook] as const;
+  return [provider, useContextHook, offlineProvider] as const;
 }
